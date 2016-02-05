@@ -3,17 +3,16 @@ package com.gu.identity.frontend.controllers
 import com.gu.identity.frontend.configuration.Configuration
 import com.gu.identity.frontend.csrf.{CSRFConfig, CSRFCheck}
 import com.gu.identity.frontend.logging.{MetricsLoggingActor, Logging}
-import com.gu.identity.frontend.models.{ClientID, ReturnUrl, TrackingData}
-import com.gu.identity.frontend.models.ClientID.FormMappings.{clientId => clientIdMapping}
+import com.gu.identity.frontend.models.ClientID
+import com.gu.identity.frontend.errors.RedirectOnError
+import com.gu.identity.frontend.models.{ReturnUrl, TrackingData}
+import com.gu.identity.frontend.request.SignInActionRequestBody
 import com.gu.identity.frontend.services._
-import play.api.data.Form
-import play.api.data.Forms.{boolean, default, mapping, optional, text}
 import play.api.i18n.{MessagesApi, I18nSupport}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import play.api.mvc.{RequestHeader, Controller}
+import play.api.mvc.{Request, RequestHeader, Controller}
 
 import scala.concurrent.Future
-import scala.util.control.NonFatal
 import play.api.i18n.Messages.Implicits._
 
 
@@ -22,29 +21,17 @@ import play.api.i18n.Messages.Implicits._
  */
 class SigninAction(identityService: IdentityService, val messagesApi: MessagesApi, csrfConfig: CSRFConfig, googleRecaptchaCheck: GoogleRecaptchaCheck, config: Configuration) extends Controller with Logging with MetricsLoggingActor with I18nSupport {
 
-  case class SignInRequest(
-    email: Option[String],
-    password: Option[String],
-    rememberMe: Boolean,
-    returnUrl: Option[String],
-    skipConfirmation: Option[Boolean],
-    googleRecaptchaResponse: Option[String],
-    clientID: Option[ClientID])
+  val redirectRoute: String = routes.Application.signIn().url
 
-  private val signInFormBody = Form(
-    mapping(
-      "email" -> optional(text),
-      "password" -> optional(text),
-      "rememberMe" -> default(boolean, false),
-      "returnUrl" -> optional(text),
-      "skipConfirmation" -> optional(boolean),
-      "g-recaptcha-response" -> optional(text),
-      "clientId" -> optional(clientIdMapping)
-    )(SignInRequest.apply)(SignInRequest.unapply)
-  )
+  final val SignInServiceAction =
+    ServiceAction andThen
+      RedirectOnError(redirectRoute) andThen
+      CSRFCheck(csrfConfig) /*andThen GoogleRecaptchaCheck*/
 
-  def signIn = CSRFCheck(csrfConfig, handleCSRFError).async { implicit request =>
-    val formParams = signInFormBody.bindFromRequest()(request).get
+
+  def signIn = SignInServiceAction(SignInActionRequestBody.parser) { request: Request[SignInActionRequestBody] =>
+    val formParams = request.body
+
     val trackingData = TrackingData(request, formParams.returnUrl)
     val returnUrl = ReturnUrl(formParams.returnUrl, request.headers.get("Referer"), config, formParams.clientID)
 
@@ -52,21 +39,15 @@ class SigninAction(identityService: IdentityService, val messagesApi: MessagesAp
       redirectToSigninPageWithErrorsAndEmail(Seq(ServiceBadRequest("error-captcha")), returnUrl, formParams.skipConfirmation, formParams.clientID)
     )
 
-    googleRecaptchaCheck(formParams.googleRecaptchaResponse, googleRecaptchaError) {
+//    googleRecaptchaCheck(formParams.googleRecaptchaResponse, googleRecaptchaError) {
       identityService.authenticate(formParams.email, formParams.password, formParams.rememberMe, trackingData).map {
-        case Left(errors) => redirectToSigninPageWithErrorsAndEmail(errors, returnUrl, formParams.skipConfirmation, formParams.clientID)
-        case Right(cookies) => {
-          logSuccessfulSignin
+        case Left(errors) => Left(errors)
+        case Right(cookies) => Right {
           SeeOther(returnUrl.url)
             .withCookies(cookies: _*)
         }
-      }.recover {
-        case NonFatal(ex) => {
-          logger.warn(s"Unexpected error signing in: ${ex.getMessage}", ex)
-          redirectToSigninPageWithErrorsAndEmail(Seq(ServiceGatewayError(ex.getMessage)), returnUrl, formParams.skipConfirmation, formParams.clientID)
-        }
       }
-    }
+//    }
   }
 
   private def redirectToSigninPageWithErrorsAndEmail(errors: Seq[ServiceError], returnUrl: ReturnUrl, skipConfirmation: Option[Boolean], clientID: Option[ClientID]) = {

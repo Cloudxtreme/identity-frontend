@@ -1,9 +1,13 @@
 package com.gu.identity.frontend
 
+import scala.util.control.NoStackTrace
+
 
 package object services {
 
-  sealed trait ServiceError {
+  type ServiceErrors = Seq[ServiceError]
+
+  sealed trait ServiceError extends NoStackTrace {
     val id: String
     val message: String
     val description: Option[String]
