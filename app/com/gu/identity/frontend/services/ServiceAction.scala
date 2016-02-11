@@ -1,6 +1,6 @@
 package com.gu.identity.frontend.services
 
-import com.gu.identity.frontend.errors.{UnexpectedErrorResult, BadGatewayErrorResult, BadRequestErrorResult, ErrorResult}
+import com.gu.identity.frontend.errors._
 import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -11,26 +11,22 @@ trait ServiceActionBuilder[+R[_]] extends ActionFunction[Request, R] {
   // TODO read the default context from ActionBuilder
   implicit val exc: ExecutionContext = play.api.libs.concurrent.Execution.defaultContext
 
-  def apply(block: R[AnyContent] => Future[Either[ServiceErrors, Result]]): Action[AnyContent] =
+  def apply(block: R[AnyContent] => Future[Either[ServiceExceptions, Result]]): Action[AnyContent] =
     apply(BodyParsers.parse.default)(block)
 
 
-  def apply[B](bodyParser: BodyParser[B])(block: R[B] => Future[Either[ServiceErrors, Result]]): Action[B] = {
-
+  def apply[B](bodyParser: BodyParser[B])(block: R[B] => Future[Either[ServiceExceptions, Result]]): Action[B] =
     buildAction(bodyParser, request =>
-      block(request).map {
-        case Right(result) => result
-        case Left(errors) => transformAPIErrors(errors)
+      block(request).flatMap {
+        case Right(result) => Future.successful(result)
+        case Left(errors) if errors.nonEmpty => Future.failed {
+          errors.headOption.getOrElse(SeqAppExceptions(errors))
+        }
+
+        // Should be impossible, but covered just in case
+        case Left(empty) => Future.failed(UnexpectedAppException("empty errors from Service"))
       }
     )
-  }
-
-  protected def transformAPIErrors(errors: ServiceErrors): Result with ErrorResult =
-    errors.headOption match {
-      case Some(error: ServiceBadRequest) => new BadRequestErrorResult(error)
-      case Some(error: ServiceGatewayError) => new BadGatewayErrorResult(error)
-      case _ => new UnexpectedErrorResult(new RuntimeException("Unknown error from Service"))
-    }
 
 
   protected def composeParser[A](bodyParser: BodyParser[A]): BodyParser[A] = bodyParser

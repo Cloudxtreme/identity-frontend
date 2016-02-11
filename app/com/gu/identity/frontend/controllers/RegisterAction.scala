@@ -3,10 +3,11 @@ package com.gu.identity.frontend.controllers
 
 import com.gu.identity.frontend.configuration.Configuration
 import com.gu.identity.frontend.csrf.{CSRFConfig, CSRFCheck}
+import com.gu.identity.frontend.errors.AppException
 import com.gu.identity.frontend.logging.{MetricsLoggingActor, Logging}
 import com.gu.identity.frontend.models.{ClientID, UrlBuilder, ClientIp, TrackingData, ReturnUrl}
 import com.gu.identity.frontend.models.ClientID.FormMappings.{clientId => clientIdMapping}
-import com.gu.identity.frontend.services.{ServiceGatewayError, ServiceError, IdentityService}
+import com.gu.identity.frontend.services.IdentityService
 import play.api.data.{Mapping, Form}
 import play.api.data.Forms._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
@@ -74,18 +75,12 @@ class RegisterAction(identityService: IdentityService, val messagesApi: Messages
           case Right(cookies) => {
             registerSuccessRedirectUrl(cookies, returnUrl, successForm.skipConfirmation, successForm.group, successForm.clientID)
           }
-        }.recover {
-          case NonFatal(ex) => {
-            logger.warn(s"Unexpected error while registering: ${ex.getMessage}", ex)
-            redirectToRegisterPageWithErrors(Seq(ServiceGatewayError(ex.getMessage)), returnUrl, successForm.skipConfirmation, successForm.group, successForm.clientID)
-          }
-
         }
       }
     )
   }
 
-  private def redirectToRegisterPageWithErrors(errors: Seq[ServiceError], returnUrl: ReturnUrl, skipConfirmation: Option[Boolean], group: Option[String], clientId: Option[ClientID]) = {
+  private def redirectToRegisterPageWithErrors(errors: Seq[AppException], returnUrl: ReturnUrl, skipConfirmation: Option[Boolean], group: Option[String], clientId: Option[ClientID]) = {
 
     val idErrors = errors.map {
       error => "error" -> (checkUserDataIsUnique(error))
@@ -103,12 +98,12 @@ class RegisterAction(identityService: IdentityService, val messagesApi: Messages
     )
   }
 
-  private def checkUserDataIsUnique(error: ServiceError): String = {
-    error.message match {
+  private def checkUserDataIsUnique(error: AppException): String = {
+    /*error.message match {
       case "Username in use" => "register-error-username-in-use"
       case "Email in use" => "register-error-email-in-use"
-      case _ => s"register-${error.id}"
-    }
+      case _ =>*/ s"register-${error.id}"
+    //}
   }
 
   private def registerSuccessRedirectUrl(cookies: Seq[PlayCookie], returnUrl: ReturnUrl, skipConfirmation: Option[Boolean], group: Option[String], clientId: Option[ClientID]) = {

@@ -1,23 +1,25 @@
 package com.gu.identity.frontend
 
-import scala.util.control.NoStackTrace
-
+import com.gu.identity.frontend.errors.AppException
 
 package object services {
 
-  type ServiceErrors = Seq[ServiceError]
+  type ServiceException = AppException
+  type ServiceExceptions = Seq[AppException]
 
-  sealed trait ServiceError extends NoStackTrace {
-    val id: String
-    val message: String
-    val description: Option[String]
-  }
+//  type ServiceErrors = Seq[ServiceError]
 
-  case class ServiceGatewayError(message: String, description: Option[String] = None) extends ServiceError {
-    override val id: String = "error-gateway"
-  }
-  case class ServiceBadRequest(message: String, description: Option[String] = None) extends ServiceError {
-    override val id: String = "error-bad-request"
-  }
+//  sealed trait ServiceError extends NoStackTrace {
+//    val id: String
+//    val message: String
+//    val description: Option[String]
+//  }
+
+//  case class ServiceGatewayError(message: String, description: Option[String] = None) extends ServiceError {
+//    override val id: String = "error-gateway"
+//  }
+//  case class ServiceBadRequest(message: String, description: Option[String] = None) extends ServiceError {
+//    override val id: String = "error-bad-request"
+//  }
 
 }

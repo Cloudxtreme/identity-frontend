@@ -4,24 +4,26 @@ import play.api.mvc._
 import play.api.mvc.Results.SeeOther
 
 import scala.concurrent.Future
-import scala.util.control.NonFatal
 
 
+/**
+ * Recover from application errors. Other errors will be caught by the global
+ * error handler, eg: 500s.
+ */
 case class RedirectOnError(route: String) extends ActionBuilder[Request] {
   def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]): Future[Result] = {
     implicit val exc = executionContext
 
     block(request)
-      .collect {
-        case result: ErrorResult => redirectResult(request, result.error)
-      }
       .recover {
-        case NonFatal(ex) => redirectResult(request, ex)
+        case SeqAppExceptions(errors) => SeeOther(route + "?error=multi")
+        case ex: AppException => redirectResultFromAppException(request, ex)
       }
 
   }
 
-  def redirectResult[A](request: Request[A], ex: Throwable) =
-    SeeOther(route) // TODO include errors
+  // TODO: use URL builder to build error params
+  def redirectResultFromAppException[A](request: Request[A], error: AppException): Result =
+    SeeOther(route + s"?error=${error.id.key}")
 
 }
