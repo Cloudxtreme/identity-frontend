@@ -11,6 +11,8 @@ GET        /register                      com.gu.identity.frontend.controllers.A
 
 GET        /register/confirm              com.gu.identity.frontend.controllers.Application.confirm(returnUrl: Option[String] ?= None)
 
+GET        /reset                         com.gu.identity.frontend.controllers.Application.reset
+
 POST       /actions/signin                com.gu.identity.frontend.controllers.SigninAction.signIn
 
 POST       /actions/register              com.gu.identity.frontend.controllers.RegisterAction.register

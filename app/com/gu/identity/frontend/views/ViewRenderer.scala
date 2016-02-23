@@ -71,6 +71,10 @@ object ViewRenderer {
       RegisterConfirmationViewModel(configuration, returnUrl))
   }
 
+  def renderResetPassword(configuration: Configuration)(implicit messages: Messages) = {
+    renderViewModel("reset-password-page", ResetPasswordViewModel(configuration))
+  }
+
 
   def renderErrorPage(configuration: Configuration, error: HttpError, resultGenerator: Html => Result)(implicit messages: Messages) =
     renderViewModel("error-page", ErrorPageViewModel(configuration, error), resultGenerator)

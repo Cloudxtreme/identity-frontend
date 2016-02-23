@@ -66,6 +66,19 @@ registerConfirmation.emailUserhelp=Email userhelp
 registerConfirmation.resetPassword=Reset password
 registerConfirmation.signOut=Sign out
 
+# com.gu.identity.frontend.models.text.ResetPasswordText
+resetPassword.pageTitle=Reset password
+resetPassword.title=Forgotten or need to reset your password?
+resetPassword.subtitle=We will email you a link to reset it.
+resetPassword.emailAddressField=Email address
+resetPassword.button=Reset Password
+resetPassword.socialNetworksTitle=Unlinked the Guardian from Facebook or Google and want to sign in?
+resetPassword.socialNetworksContent=Use the email address field to send a reset link to your registered Facebook or Google email. You will then be able to add a password to your account.
+resetPassword.userHelpTitle=Something else?
+resetPassword.userHelpEmail=Email Userhelp
+resetPassword.userHelpContent=who will be able to help you.
+
+
 errors.badRequest.pageTitle=Bad request: {0}
 errors.badRequest.title=Bad request: {0}
 errors.badRequest.description=Your request was not recognised. Please try again.

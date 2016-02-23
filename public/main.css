@@ -28,3 +28,7 @@
 /** Register Confirmation page **/
 
 @import "components/register-confirmation/_register-confirmation";
+
+/** Reset password page **/
+
+@import "components/reset-password/_reset-password";

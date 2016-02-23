@@ -5,7 +5,7 @@ import com.gu.identity.frontend.csrf.{CSRFConfig, CSRFToken, CSRFAddToken}
 import com.gu.identity.frontend.logging.Logging
 import com.gu.identity.frontend.models.ReturnUrl
 import com.gu.identity.frontend.mvt.MultiVariantTestAction
-import com.gu.identity.frontend.views.ViewRenderer.{renderSignIn, renderRegisterConfirmation, renderRegister}
+import com.gu.identity.frontend.views.ViewRenderer.{renderSignIn, renderRegisterConfirmation, renderRegister, renderResetPassword}
 import play.api.i18n.{MessagesApi, I18nSupport}
 import play.api.mvc._
 
@@ -34,6 +34,10 @@ class Application (configuration: Configuration, val messagesApi: MessagesApi, c
 
   def confirm(returnUrl: Option[String]) = Action {
     renderRegisterConfirmation(configuration, returnUrl)
+  }
+
+  def reset = Action {
+    renderResetPassword(configuration)
   }
 }
 
