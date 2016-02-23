@@ -6,6 +6,7 @@ import play.api.i18n.Messages
 
 
 case class ResetPasswordViewModel private(
+    layout: LayoutViewModel,
     resetPasswordText: ResetPasswordText,
     userHelpEmailAddress: String = ResetPasswordViewModel.userHelpEmailAddress,
     resources: Seq[PageResource with Product],
@@ -20,7 +21,9 @@ object ResetPasswordViewModel {
 
   def apply(configuration: Configuration)(implicit messages: Messages): ResetPasswordViewModel = {
     val layout = LayoutViewModel(configuration)
+
     ResetPasswordViewModel(
+      layout = layout,
       resetPasswordText = ResetPasswordText(),
       resources = layout.resources,
       indirectResources = layout.indirectResources
