@@ -14,3 +14,5 @@ case class AuthenticationCookiesResponseCookie(key: String, value: String, sessi
 case class RegisterResponse(user: RegisterResponseUser) extends ApiResponse
 case class RegisterResponseUser(userGroups: List[RegisterResponseUserGroups])
 case class RegisterResponseUserGroups(packageCode: String, path: String)
+
+case class SendResetPasswordEmailResponse() extends ApiResponse

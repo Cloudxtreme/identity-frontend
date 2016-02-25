@@ -82,6 +82,15 @@ class IdentityServiceRequestHandler (ws: WSClient) extends IdentityClientRequest
           Left(Seq(GatewayError("Unexpected response from server")))
         }
 
+    case r: SendResetPasswordEmailApiRequest =>
+      if (response.status == 200) {
+        Right(SendResetPasswordEmailResponse())
+      }
+      else {
+        logger.warn(s"Unexpected response from server: ${response.status} ${response.statusText} ${response.body}")
+        Left(Seq(GatewayError("Unexpected response from server")))
+      }
+
     case _ => Left(Seq(GatewayError("Unsupported request")))
   }
 

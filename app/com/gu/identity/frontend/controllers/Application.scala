@@ -36,8 +36,8 @@ class Application (configuration: Configuration, val messagesApi: MessagesApi, c
     renderRegisterConfirmation(configuration, returnUrl)
   }
 
-  def reset = Action {
-    renderResetPassword(configuration)
+  def reset(error: Seq[String]) = Action {
+    renderResetPassword(configuration, error)
   }
 }
 

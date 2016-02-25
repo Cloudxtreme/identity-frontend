@@ -1,6 +1,7 @@
 package com.gu.identity.service.client
 
 import com.gu.identity.frontend.controllers.RegisterRequest
+import com.gu.identity.frontend.controllers.ResetPasswordData
 import com.gu.identity.frontend.models.{ClientRegistrationIp, TrackingData}
 
 sealed trait ApiRequest {
@@ -102,3 +103,10 @@ case class RegisterRequestBodyPrivateFields(
 case class RegisterRequestBodyStatusFields(
     receiveGnmMarketing: Boolean,
     receive3rdPartyMarketing: Boolean)
+
+case class SendResetPasswordEmailApiRequest(data: ResetPasswordData)(implicit configuration: IdentityClientConfiguration) extends ApiRequest {
+  override val method = GET
+  override val headers = ApiRequest.apiKeyHeaders
+  override val url = ApiRequest.apiEndpoint("pwd-reset/send-password-reset-email")
+  override val parameters = Seq("type" -> "reset", "email-address" -> data.email)
+}

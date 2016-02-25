@@ -2,6 +2,7 @@ package com.gu.identity.frontend.services
 
 import com.gu.identity.frontend.configuration.Configuration
 import com.gu.identity.frontend.controllers.RegisterRequest
+import com.gu.identity.frontend.controllers.ResetPasswordData
 import com.gu.identity.frontend.models.{ClientRegistrationIp, TrackingData}
 import com.gu.identity.service.client._
 import org.joda.time.{DateTime, Seconds}
@@ -19,6 +20,7 @@ trait IdentityService {
   def authenticate(email: Option[String], password: Option[String], rememberMe: Boolean, trackingData: TrackingData)(implicit ec: ExecutionContext): Future[Either[Seq[ServiceError], Seq[PlayCookie]]]
   def registerThenSignIn(request:RegisterRequest, clientIp: ClientRegistrationIp, trackingData: TrackingData)(implicit ec: ExecutionContext): Future[Either[Seq[ServiceError], Seq[PlayCookie]]]
   def register(request: RegisterRequest, clientIp: ClientRegistrationIp, trackingData: TrackingData)(implicit ec: ExecutionContext): Future[Either[Seq[ServiceError], RegisterResponseUser]]
+  def sendResetPasswordEmail(data: ResetPasswordData)(implicit ec: ExecutionContext): Future[Either[Seq[ServiceError], SendResetPasswordEmailResponse ]]
 }
 
 
@@ -72,6 +74,20 @@ class IdentityServiceImpl(config: Configuration, adapter: IdentityServiceRequest
           case Right(cookies) => Right(cookies)
         }
       }
+    }
+  }
+
+  override def sendResetPasswordEmail(resetPasswordData: ResetPasswordData)(implicit ec: ExecutionContext): Future[Either[Seq[ServiceError], SendResetPasswordEmailResponse ]] = {
+    val apiRequest = SendResetPasswordEmailApiRequest(resetPasswordData)
+    client.sendResetPasswordEmail(apiRequest).map {
+      case Left(errors) => Left {
+        errors.map {
+          case e: BadRequest => ServiceBadRequest(e.message, e.description)
+          case e: GatewayError => ServiceGatewayError(e.message, e.description)
+          case _ => ServiceGatewayError("Unknown error")
+        }
+      }
+      case Right(okResponse) => Right(okResponse)
     }
   }
 }

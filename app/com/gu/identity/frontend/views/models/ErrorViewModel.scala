@@ -25,7 +25,9 @@ object ErrorViewModel {
     "register-error-email" -> "Invalid email address; please try again.",
     "register-error-username" -> "Invalid username; your username must be between 6 and 20 characters long and contain only letters and numbers.",
     "register-error-password" -> "Invalid password; your password must be between 6 and 20 characters long.",
-    "register-error-csrf" -> "Forgery token invalid; please try again."
+    "register-error-csrf" -> "Forgery token invalid; please try again.",
+    "reset-error-gateway" -> "There was a problem resetting your password; please try again",
+    "reset-error-bad-request" -> "Incorrect email; please try again."
   )
 
   private def nonEmptyField(fieldName: String) = s"${fieldName.capitalize} field must not be blank."
