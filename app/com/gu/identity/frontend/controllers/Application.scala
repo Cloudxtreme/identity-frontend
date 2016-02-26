@@ -36,8 +36,10 @@ class Application (configuration: Configuration, val messagesApi: MessagesApi, c
     renderRegisterConfirmation(configuration, returnUrl)
   }
 
-  def reset(error: Seq[String]) = Action {
-    renderResetPassword(configuration, error)
+  def reset(error: Seq[String]) = CSRFAddToken(csrfConfig) { req =>
+    val csrfToken = CSRFToken.fromRequest(csrfConfig, req)
+
+    renderResetPassword(configuration, error, csrfToken)
   }
 }
 

@@ -71,10 +71,15 @@ object ViewRenderer {
       RegisterConfirmationViewModel(configuration, returnUrl))
   }
 
-  def renderResetPassword(configuration: Configuration, errorIds: Seq[String])(implicit messages: Messages) = {
+  def renderResetPassword(
+    configuration: Configuration,
+    errorIds: Seq[String],
+    csrfToken: Option[CSRFToken])
+    (implicit messages: Messages) = {
     val model = ResetPasswordViewModel(
       configuration = configuration,
-      errors = errorIds.map(ErrorViewModel.apply)
+      errors = errorIds.map(ErrorViewModel.apply),
+      csrfToken = csrfToken
     )
     renderViewModel("reset-password-page", model)
   }

@@ -27,6 +27,7 @@ object ErrorViewModel {
     "register-error-password" -> "Invalid password; your password must be between 6 and 20 characters long.",
     "register-error-csrf" -> "Forgery token invalid; please try again.",
     "reset-error-gateway" -> "There was a problem resetting your password; please try again",
+    "reset-error-csrf" -> "Forgery token invalid; please try again",
     "reset-error-bad-request" -> "Incorrect email; please try again."
   )
 
