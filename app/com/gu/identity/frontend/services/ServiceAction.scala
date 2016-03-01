@@ -24,7 +24,7 @@ trait ServiceActionBuilder[+R[_]] extends ActionFunction[Request, R] {
 
   def apply[B](bodyParser: BodyParser[B])(block: R[B] => Future[ServiceResult]): Action[B] = {
     val transformBlock = (request: R[B]) =>
-      block(request).flatMap(transformServiceResult)
+      block(request).flatMap(transformServiceResult)(executionContext)
 
     underlying.async(bodyParser)(transformBlock)
   }
