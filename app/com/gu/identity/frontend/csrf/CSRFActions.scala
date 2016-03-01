@@ -1,6 +1,7 @@
 package com.gu.identity.frontend.csrf
 
 import com.gu.identity.frontend.controllers.NoCache
+import com.gu.identity.frontend.utils.ComposableActionBuilder
 import play.api.mvc._
 import play.filters.csrf.CSRF.ErrorHandler
 import play.filters.csrf.{CSRFAddToken => PlayCSRFAddToken, CSRFCheck => PlayCSRFCheck}
@@ -10,7 +11,7 @@ import scala.concurrent.Future
 
 sealed trait CSRFActions
 
-case class CSRFAddToken(config: CSRFConfig) extends ActionBuilder[Request] with CSRFActions {
+case class CSRFAddToken(config: CSRFConfig) extends ComposableActionBuilder[Request] with CSRFActions {
   def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]): Future[Result] =
     NoCache(block(request))
 
@@ -23,7 +24,7 @@ case class CSRFAddToken(config: CSRFConfig) extends ActionBuilder[Request] with 
 
 }
 
-case class CSRFCheck(config: CSRFConfig, errorHandler: CSRFErrorHandler = defaultErrorHandler) extends ActionBuilder[Request] with CSRFActions {
+case class CSRFCheck(config: CSRFConfig, errorHandler: CSRFErrorHandler = defaultErrorHandler) extends ComposableActionBuilder[Request] with CSRFActions {
   def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]): Future[Result] =
     NoCache(block(request))
 
