@@ -39,7 +39,7 @@ class ApplicationComponents(context: Context) extends BuiltInComponentsFromConte
   lazy val cspReporterController = new CSPViolationReporter()
   lazy val googleRecaptchaServiceHandler = new GoogleRecaptchaServiceHandler(wsClient, frontendConfiguration)
   lazy val googleRecaptchaCheck = new GoogleRecaptchaCheck(googleRecaptchaServiceHandler)
-  lazy val signinController = new SigninAction(identityService, messagesApi, csrfConfig, googleRecaptchaCheck, frontendConfiguration)
+  lazy val signinController = new SigninAction(identityService, messagesApi, csrfConfig, frontendConfiguration)
   lazy val registerController = new RegisterAction(identityService, messagesApi, frontendConfiguration, csrfConfig)
   lazy val resetPasswordController = new ResetPasswordAction(identityService, csrfConfig)
   lazy val assets = new controllers.Assets(httpErrorHandler)
