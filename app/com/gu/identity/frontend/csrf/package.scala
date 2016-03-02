@@ -10,4 +10,9 @@ package object csrf {
   type CSRFErrorHandler = (RequestHeader, String) => Future[Result]
 
   lazy val defaultErrorHandler: CSRFErrorHandler = CSRF.DefaultErrorHandler.handle
+
+
+  trait RequestBodyWithCSRFToken {
+    val csrfToken: String
+  }
 }
