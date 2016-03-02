@@ -2,8 +2,10 @@ package com.gu.identity.frontend.controllers
 
 import com.gu.identity.frontend.configuration.Configuration
 import com.gu.identity.frontend.csrf.CSRFConfig
+import com.gu.identity.frontend.errors.{SignInServiceGatewayAppException, SignInServiceBadRequestException}
 import com.gu.identity.frontend.models.TrackingData
 import com.gu.identity.frontend.services._
+import com.gu.identity.service.client.{GatewayError, BadRequest}
 import org.mockito.Mockito._
 import org.mockito.Matchers.{any => argAny, eq => argEq}
 import org.scalatest.mock.MockitoSugar
@@ -45,6 +47,13 @@ class SigninActionSpec extends PlaySpec with MockitoSugar {
     FakeRequest("POST", "/actions/signin")
       .withFormUrlEncodedBody(bodyParams: _*)
   }
+
+  def fakeBadRequestError(message: String) =
+    Seq(SignInServiceBadRequestException(BadRequest(message)))
+
+  def fakeGatewayError(message: String = "Unexpected 500 error") =
+    Seq(SignInServiceGatewayAppException(GatewayError(message)))
+
 
   class MockRecaptchaCheck(stubbedResult: Boolean = true) extends GoogleRecaptchaCheck(mockGoogleRecaptchaServiceHandler) {
 
@@ -93,7 +102,7 @@ class SigninActionSpec extends PlaySpec with MockitoSugar {
       when(mockIdentityService.authenticate(argEq(email), argEq(password), argEq(rememberMe.isDefined), argAny[TrackingData])(argAny[ExecutionContext]))
         .thenReturn {
           Future.successful {
-            Left(Seq(ServiceBadRequest("Invalid email or password")))
+            Left(fakeBadRequestError("Invalid email or password"))
           }
         }
 
@@ -114,7 +123,7 @@ class SigninActionSpec extends PlaySpec with MockitoSugar {
       when(mockIdentityService.authenticate(argEq(email), argEq(password), argEq(rememberMe.isDefined), argAny[TrackingData])(argAny[ExecutionContext]))
         .thenReturn {
           Future.successful {
-            Left(Seq(ServiceGatewayError("Unexpected 500 error")))
+            Left(fakeGatewayError())
           }
         }
 
