@@ -15,6 +15,8 @@ case object SignInBadRequestErrorID extends ErrorID { val key = "signin-error-ba
 case object RegisterGatewayErrorID extends ErrorID { val key = "register-error-gateway" }
 case object RegisterBadRequestErrorID extends ErrorID { val key = "register-error-bad-request" }
 
+case object ForgeryTokenErrorID extends ErrorID { val key = "error-forgery-token" }
+
 case object UnexpectedErrorID extends ErrorID { val key = "error-unexpected" }
 
 
@@ -117,4 +119,10 @@ case class RegisterServiceBadRequestException(
   with RegisterServiceAppException {
 
   val id = RegisterBadRequestErrorID
+}
+
+
+// Forgery token errors (CSRF checks)
+case class ForgeryTokenAppException(message: String) extends AbstractAppException(message) {
+  val id = ForgeryTokenErrorID
 }

@@ -13,7 +13,6 @@ object ErrorViewModel {
   val errorMessages = Map(
     "signin-error-gateway" -> "There was a problem signing in; please try again.",
     "signin-error-bad-request" -> "Incorrect email or password; please try again.",
-    "signin-error-csrf" -> "Forgery token invalid; please try again.",
     "signin-error-captcha" -> "Problem with the captcha process; please try again.",
     "register-error-gateway" -> "There was a problem creating your account; please try again.",
     "register-error-bad-request" -> "One or more inputs was not valid; please try again.",
@@ -29,7 +28,8 @@ object ErrorViewModel {
     "reset-password-error-gateway" -> "There was a problem resetting your password; please try again",
     "reset-password-error-csrf" -> "Forgery token invalid; please try again",
     "reset-password-error-bad-request" -> "There was a problem resetting your password; please try again.",
-    "reset-password-error-email" -> nonEmptyField("email")
+    "reset-password-error-email" -> nonEmptyField("email"),
+    "error-forgery-token" -> "Forgery token invalid; please try again."
   )
 
   private def nonEmptyField(fieldName: String) = s"${fieldName.capitalize} field must not be blank."

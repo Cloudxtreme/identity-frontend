@@ -1,6 +1,7 @@
 package com.gu.identity.frontend.csrf
 
 import com.gu.identity.frontend.controllers.NoCache
+import com.gu.identity.frontend.errors.ForgeryTokenAppException
 import com.gu.identity.frontend.utils.ComposableActionBuilder
 import play.api.mvc._
 import play.filters.csrf.CSRF.ErrorHandler
@@ -24,7 +25,7 @@ case class CSRFAddToken(config: CSRFConfig) extends ComposableActionBuilder[Requ
 
 }
 
-case class CSRFCheck(config: CSRFConfig, errorHandler: CSRFErrorHandler = defaultErrorHandler) extends ComposableActionBuilder[Request] with CSRFActions {
+case class CSRFCheck(config: CSRFConfig) extends ComposableActionBuilder[Request] with CSRFActions {
 
   def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]): Future[Result] =
     NoCache(block(request))
@@ -37,10 +38,11 @@ case class CSRFCheck(config: CSRFConfig, errorHandler: CSRFErrorHandler = defaul
       action
 
   protected def playCSRFCheckAction[A](wrapAction: Action[A]) =
-    PlayCSRFCheck(wrapAction, playErrorHandler, config.underlying)
+    PlayCSRFCheck(wrapAction, errorHandler, config.underlying)
 
-  lazy val playErrorHandler = new ErrorHandler {
-    def handle(req: RequestHeader, msg: String): Future[Result] = errorHandler(req, msg)
+  lazy val errorHandler = new ErrorHandler {
+    def handle(req: RequestHeader, msg: String): Future[Result] =
+      Future.failed(ForgeryTokenAppException(msg))
   }
 
 

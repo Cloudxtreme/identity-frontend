@@ -55,16 +55,5 @@ class SigninAction(identityService: IdentityService, val messagesApi: MessagesAp
 //    SeeOther(routes.Application.signIn(query, Some(returnUrl.url), skipConfirmation).url)
 //  }
 
-
-  // Note: Limitation
-  //       Error Handler only accepts RequestHeader instead of Request, so we cannot
-  //       pass ReturnUrl and skipConfirmation as they're on the Request body.
-  private def handleCSRFError(request: RequestHeader, msg: String) = Future.successful {
-    logger.error(s"CSRF error during Sign-in: $msg")
-    val errors = Seq("signin-error-csrf")
-
-    SeeOther(routes.Application.signIn(errors).url)
-  }
-
 }
 
