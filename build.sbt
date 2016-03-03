@@ -27,6 +27,8 @@ libraryDependencies ++= Seq(
 // Set logs options and default local resource for running locally (run and test)
 javaOptions ++= Seq("-Dlogs.home=logs", "-Dconfig.resource=DEV.conf")
 
+testOptions in Test += Tests.Argument("-oDF")
+
 // Config for packaging app for deployment with riffraff
 packageName in Universal := normalizedName.value
 
