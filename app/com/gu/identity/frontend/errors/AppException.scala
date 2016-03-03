@@ -17,6 +17,8 @@ case object RegisterBadRequestErrorID extends ErrorID { val key = "register-erro
 
 case object ForgeryTokenErrorID extends ErrorID { val key = "error-forgery-token" }
 
+case object SignInActionBadRequestErrorID extends ErrorID { val key = "signin-error-bad-request" }
+
 case object UnexpectedErrorID extends ErrorID { val key = "error-unexpected" }
 
 
@@ -41,10 +43,13 @@ sealed abstract class AbstractAppException(
     this(clientError.message, clientError.cause)
 }
 
+sealed trait BadRequestAppException extends AppException
+
 // 4xx
 sealed abstract class ServiceBadRequestAppException(
     clientError: IdentityClientError)
   extends AbstractAppException(clientError)
+  with BadRequestAppException
   with NoStackTrace
 
 // 503
@@ -126,3 +131,10 @@ case class RegisterServiceBadRequestException(
 case class ForgeryTokenAppException(message: String) extends AbstractAppException(message) {
   val id = ForgeryTokenErrorID
 }
+
+case class SignInActionBadRequestAppException(message: String)
+  extends AbstractAppException(message)
+  with BadRequestAppException {
+  val id = SignInActionBadRequestErrorID
+}
+

@@ -5,6 +5,7 @@ import play.api.mvc._
 import play.api.mvc.Results.SeeOther
 
 import scala.concurrent.Future
+import scala.util.control.NonFatal
 
 
 /**
@@ -15,7 +16,7 @@ case class RedirectOnError(route: String) extends ComposableActionBuilder[Reques
 
   def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]): Future[Result] =
     block(request)
-      .recover(recoverKnownAppExceptions(request))(executionContext)
+      .recover(recoverExceptions(request))(executionContext)
 
 
   /**
@@ -27,13 +28,23 @@ case class RedirectOnError(route: String) extends ComposableActionBuilder[Reques
       def parser: BodyParser[A] = other.parser
 
       def apply(request: Request[A]): Future[Result] =
-        other.apply(request).recover(recoverKnownAppExceptions(request))(executionContext)
+        other.apply(request).recover(recoverExceptions(request))(executionContext)
     }
 
 
-  def recoverKnownAppExceptions[A](request: Request[A]) = PartialFunction[Throwable, Result] {
+  override def composeParser[A](other: BodyParser[A]): BodyParser[A] =
+    BodyParser { request =>
+      other.apply(request).recover {
+        case ex: AppException => Left(SeeOther(route + s"?error=${ex.id.key}"))
+      }(executionContext)
+    }
+
+
+  def recoverExceptions[A](request: Request[A]) = PartialFunction[Throwable, Result] {
     case SeqAppExceptions(errors) => SeeOther(route + "?error=multi")
     case ex: AppException => redirectResultFromAppException(request, ex)
+    case NonFatal(ex) =>
+      redirectResultFromAppException(request, UnexpectedAppException(s"Unexpected error: ${ex.getMessage}", Some(ex)))
   }
 
 

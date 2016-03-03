@@ -21,6 +21,9 @@ import scala.concurrent.{ExecutionContext, Future}
 class SigninActionSpec extends PlaySpec with MockitoSugar {
   val fakeCsrfConfig = CSRFConfig.disabled
 
+  val signInPageUrl = routes.Application.signIn().url
+
+
   trait WithControllerMockedDependencies {
     val mockIdentityService = mock[IdentityService]
     val messages = mock[MessagesApi]
@@ -30,13 +33,18 @@ class SigninActionSpec extends PlaySpec with MockitoSugar {
 
 
   def fakeSigninRequest(
-      email: Option[String],
-      password: Option[String],
-      rememberMe: Option[String],
-      returnUrl: Option[String]) = {
-    val bodyParams = Seq("email" -> email, "password" -> password, "keepMeSignedIn" -> rememberMe, "returnUrl" -> returnUrl)
-      .filter(_._2.isDefined)
-      .map(p => p._1 -> p._2.get)
+      email: Option[String] = None,
+      password: Option[String] = None,
+      rememberMe: Option[String] = None,
+      returnUrl: Option[String] = None) = {
+
+    val bodyParams = Seq(
+      email.map("email" -> _),
+      password.map("password" -> _),
+      rememberMe.map("rememberMe" -> _),
+      returnUrl.map("returnUrl" -> _),
+      Some("csrfToken" -> "~~fake token~~")
+    ).flatten
 
     FakeRequest("POST", "/actions/signin")
       .withFormUrlEncodedBody(bodyParams: _*)
@@ -92,9 +100,8 @@ class SigninActionSpec extends PlaySpec with MockitoSugar {
       val result = call(controller.signIn, fakeSigninRequest(email, password, None, returnUrl))
 
       status(result) mustEqual SEE_OTHER
-      redirectLocation(result).get should startWith (routes.Application.signIn().url)
-
-      // TODO check error parameters
+      redirectLocation(result).get should startWith (signInPageUrl)
+      redirectLocation(result).get should include ("error=signin-error-bad-request")
     }
 
     "redirect to sign in page when service error" in new WithControllerMockedDependencies {
@@ -113,9 +120,8 @@ class SigninActionSpec extends PlaySpec with MockitoSugar {
       val result = call(controller.signIn, fakeSigninRequest(email, password, None, returnUrl))
 
       status(result) mustEqual SEE_OTHER
-      redirectLocation(result).get should startWith (routes.Application.signIn().url)
-
-      // TODO check error parameters
+      redirectLocation(result).value should startWith (signInPageUrl)
+      redirectLocation(result).value should include ("error=signin-error-gateway")
     }
 
 
@@ -135,9 +141,9 @@ class SigninActionSpec extends PlaySpec with MockitoSugar {
       val result = call(controller.signIn, fakeSigninRequest(email, password, None, returnUrl))
 
       status(result) mustEqual SEE_OTHER
-      redirectLocation(result).get should startWith (routes.Application.signIn().url)
+      redirectLocation(result).value should startWith (signInPageUrl)
+      redirectLocation(result).value should include ("error=error-unexpected")
 
-      // TODO check error parameters
     }
 
   }
