@@ -10,6 +10,9 @@ case class ReturnUrl private[models](
     isDefault: Boolean = false) {
 
   lazy val url: String = uri.toString
+
+  lazy val toStringOpt: Option[String] =
+    Some(url).filter(_ => isDefault)
 }
 
 object ReturnUrl {
@@ -63,4 +66,14 @@ object ReturnUrl {
     val urlPath = uri.getPath
     !invalidUrlPaths.contains(urlPath)
   }
+
+
+  object FormMapping {
+    import play.api.data.Mapping
+    import play.api.data.Forms.{optional, text}
+
+    def returnUrl(refererHeader: Option[String], configuration: Configuration): Mapping[ReturnUrl] =
+      optional(text).transform(ReturnUrl.apply(_: Option[String], refererHeader, configuration), _.toStringOpt)
+  }
+
 }

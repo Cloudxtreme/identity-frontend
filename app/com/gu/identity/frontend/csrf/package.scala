@@ -11,8 +11,4 @@ package object csrf {
 
   lazy val defaultErrorHandler: CSRFErrorHandler = CSRF.DefaultErrorHandler.handle
 
-
-  trait RequestBodyWithCSRFToken {
-    val csrfToken: String
-  }
 }

@@ -38,7 +38,7 @@ object ClientID {
   def apply(clientId: Option[String]): Option[ClientID] =
     clientId.flatMap(apply)
 
-  object FormMappings {
+  object FormMapping {
     lazy val clientId: FieldMapping[ClientID] = Forms.of[ClientID](ClientIdFormatter)
 
     private object ClientIdFormatter extends Formatter[ClientID] {

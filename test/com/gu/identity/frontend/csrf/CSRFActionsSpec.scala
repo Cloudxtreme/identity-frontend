@@ -1,5 +1,6 @@
 package com.gu.identity.frontend.csrf
 
+import com.gu.identity.frontend.request.RequestParameters.CSRFTokenRequestParameter
 import com.gu.identity.frontend.test.SimpleAppPerSuite
 import org.scalatestplus.play.PlaySpec
 import play.api.mvc._
@@ -32,7 +33,7 @@ class CSRFActionsSpec extends PlaySpec with SimpleAppPerSuite {
   case class MyCustomRequestBodyType(
       csrfToken: String,
       testString: String = "test from type")
-    extends RequestBodyWithCSRFToken
+    extends CSRFTokenRequestParameter
 
   val myCustomRequestBodyParser = BodyParsers.parse.urlFormEncoded.map { data =>
     MyCustomRequestBodyType("~~stubbed csrf token~~")

@@ -5,6 +5,7 @@ import com.gu.identity.frontend.controllers.RegisterRequest
 import com.gu.identity.frontend.controllers.ResetPasswordData
 import com.gu.identity.frontend.errors._
 import com.gu.identity.frontend.models.{ClientIp, TrackingData}
+import com.gu.identity.frontend.request.RequestParameters.SignInRequestParameters
 import com.gu.identity.service.client._
 import com.gu.identity.service.client.request.{SendResetPasswordEmailApiRequest, RegisterApiRequest}
 import org.joda.time.{DateTime, Seconds}
@@ -21,7 +22,7 @@ import scala.concurrent.{ExecutionContext, Future}
 trait IdentityService {
   type PlayCookies = Seq[PlayCookie]
 
-  def authenticate(email: Option[String], password: Option[String], rememberMe: Boolean, trackingData: TrackingData)(implicit ec: ExecutionContext): Future[Either[ServiceExceptions, PlayCookies]]
+  def authenticate(signInRequest: SignInRequestParameters, trackingData: TrackingData)(implicit ec: ExecutionContext): Future[Either[ServiceExceptions, PlayCookies]]
   def registerThenSignIn(request:RegisterRequest, clientIp: ClientIp, trackingData: TrackingData)(implicit ec: ExecutionContext): Future[Either[ServiceExceptions, PlayCookies]]
   def register(request: RegisterRequest, clientIp: ClientIp, trackingData: TrackingData)(implicit ec: ExecutionContext): Future[Either[ServiceExceptions, RegisterResponseUser]]
   def sendResetPasswordEmail(data: ResetPasswordData, clientIp: ClientIp)(implicit ec: ExecutionContext): Future[Either[ServiceExceptions, SendResetPasswordEmailResponse ]]
@@ -32,13 +33,13 @@ class IdentityServiceImpl(config: Configuration, adapter: IdentityServiceRequest
 
   implicit val clientConfiguration = IdentityClientConfiguration(config.identityApiHost, config.identityApiKey, adapter)
 
-  override def authenticate(email: Option[String], password: Option[String], rememberMe: Boolean, trackingData: TrackingData)(implicit ec: ExecutionContext) = {
-    client.authenticateCookies(email, password, rememberMe, trackingData).map {
+  override def authenticate(signInRequest: SignInRequestParameters, trackingData: TrackingData)(implicit ec: ExecutionContext) = {
+    client.authenticateCookies(signInRequest.email, signInRequest.password, signInRequest.rememberMe, trackingData).map {
       case Left(errors) =>
         Left(errors.map(SignInServiceAppException.apply))
 
       case Right(cookies) => Right(cookies.map { c =>
-        val maxAge = if (rememberMe) Some(Seconds.secondsBetween(DateTime.now, c.expires).getSeconds) else None
+        val maxAge = if (signInRequest.rememberMe) Some(Seconds.secondsBetween(DateTime.now, c.expires).getSeconds) else None
         val secureHttpOnly = c.key.startsWith("SC_")
         val cookieMaxAgeOpt = maxAge.filterNot(_ => c.isSession)
 
@@ -64,7 +65,14 @@ class IdentityServiceImpl(config: Configuration, adapter: IdentityServiceRequest
     register(request, clientIp, trackingData).flatMap{
       case Left(errors) => Future.successful(Left(errors))
       case Right(user) => {
-        authenticate(Some(request.email), Some(request.password), true, trackingData).map {
+        // TODO use Request Parameter types for Register Request
+        val authRequest = new SignInRequestParameters {
+          val email: Option[String] = Some(request.email)
+          val password: Option[String] = Some(request.password)
+          val rememberMe: Boolean = true
+        }
+
+        authenticate(authRequest, trackingData).map {
           case Left(signInErrors) => {
             logger.error(s"User could not be logged in after registering: $signInErrors")
             signInErrors.foreach { err =>

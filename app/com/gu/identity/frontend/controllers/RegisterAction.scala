@@ -6,7 +6,7 @@ import com.gu.identity.frontend.csrf.{CSRFConfig, CSRFCheck}
 import com.gu.identity.frontend.errors.AppException
 import com.gu.identity.frontend.logging.{MetricsLoggingActor, Logging}
 import com.gu.identity.frontend.models.{ClientID, UrlBuilder, ClientIp, TrackingData, ReturnUrl}
-import com.gu.identity.frontend.models.ClientID.FormMappings.{clientId => clientIdMapping}
+import com.gu.identity.frontend.models.ClientID.FormMapping.{clientId => clientIdMapping}
 import com.gu.identity.frontend.services.IdentityService
 import play.api.data.{Mapping, Form}
 import play.api.data.Forms._

@@ -2,6 +2,7 @@ package com.gu.identity.frontend.csrf
 
 import com.gu.identity.frontend.controllers.NoCache
 import com.gu.identity.frontend.errors.ForgeryTokenAppException
+import com.gu.identity.frontend.request.RequestParameters.CSRFTokenRequestParameter
 import com.gu.identity.frontend.utils.ComposableActionBuilder
 import play.api.mvc._
 import play.filters.csrf.CSRF.ErrorHandler
@@ -77,7 +78,7 @@ case class CSRFCheck(config: CSRFConfig) extends ComposableActionBuilder[Request
 
     private def transformRequestBody(request: Request[_]): Request[RequestBodyUrlFormEncoded] =
       request.map {
-        case body: RequestBodyWithCSRFToken =>
+        case body: CSRFTokenRequestParameter =>
           Map(config.tokenName -> Seq(body.csrfToken))
 
         case body: AnyContent if body.asFormUrlEncoded.isDefined => body.asFormUrlEncoded.get

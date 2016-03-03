@@ -4,10 +4,12 @@ import com.gu.identity.frontend.configuration.Configuration
 import com.gu.identity.frontend.csrf.CSRFConfig
 import com.gu.identity.frontend.errors.{SignInServiceGatewayAppException, SignInServiceBadRequestException}
 import com.gu.identity.frontend.models.TrackingData
+import com.gu.identity.frontend.request.RequestParameters.SignInRequestParameters
 import com.gu.identity.frontend.services._
 import com.gu.identity.service.client.{GatewayError, BadRequest}
+import org.mockito.ArgumentMatcher
 import org.mockito.Mockito._
-import org.mockito.Matchers.{any => argAny, eq => argEq}
+import org.mockito.Matchers.{any => argAny, argThat}
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import play.api.i18n.MessagesApi
@@ -17,6 +19,7 @@ import play.api.test.Helpers._
 import org.scalatest.Matchers._
 
 import scala.concurrent.{ExecutionContext, Future}
+
 
 class SigninActionSpec extends PlaySpec with MockitoSugar {
   val fakeCsrfConfig = CSRFConfig.disabled
@@ -29,7 +32,33 @@ class SigninActionSpec extends PlaySpec with MockitoSugar {
     val messages = mock[MessagesApi]
     val config = Configuration.testConfiguration
     lazy val controller = new SigninAction(mockIdentityService, messages, fakeCsrfConfig, config)
+
+    def mockAuthenticate(
+        email: Option[String] = None,
+        password: Option[String] = None,
+        rememberMe: Boolean = false) = {
+
+      val mockRequest = MockSignInRequest(email, password, rememberMe)
+
+      mockIdentityService.authenticate(
+        argThat(signInRequestParamsMatcher(mockRequest)),
+        argAny[TrackingData]
+      )(argAny[ExecutionContext])
+    }
   }
+
+  private case class MockSignInRequest(email: Option[String], password: Option[String], rememberMe: Boolean)
+    extends SignInRequestParameters
+
+  def signInRequestParamsMatcher(expect: SignInRequestParameters) =
+    new ArgumentMatcher[SignInRequestParameters] {
+      def matches(arg: scala.Any): Boolean = arg match {
+        case r: SignInRequestParameters
+          if r.email == expect.email && r.password == expect.password && r.rememberMe == expect.rememberMe => true
+        case _ => false
+      }
+    }
+
 
 
   def fakeSigninRequest(
@@ -62,19 +91,18 @@ class SigninActionSpec extends PlaySpec with MockitoSugar {
     "redirect to returnUrl when passed authentication" in new WithControllerMockedDependencies {
       val email = Some("me@me.com")
       val password = Some("password")
-      val rememberMe = None
       val returnUrl = Some("http://www.theguardian.com/yeah")
 
       val testCookie = Cookie("SC_GU_U", "##hash##")
 
-      when(mockIdentityService.authenticate(argEq(email), argEq(password), argEq(rememberMe.isDefined), argAny[TrackingData])(argAny[ExecutionContext]))
+      when(mockAuthenticate(email, password))
         .thenReturn {
           Future.successful {
             Right(Seq(testCookie))
           }
         }
 
-      val result = call(controller.signIn, fakeSigninRequest(email, password, None, returnUrl))
+      val result = call(controller.signIn, fakeSigninRequest(email, password, returnUrl = returnUrl))
       val resultCookies = cookies(result)
 
       status(result) mustEqual SEE_OTHER
@@ -87,17 +115,16 @@ class SigninActionSpec extends PlaySpec with MockitoSugar {
     "redirect to sign in page when failed authentication" in new WithControllerMockedDependencies {
       val email = Some("me@me.com")
       val password = Some("password")
-      val rememberMe = None
       val returnUrl = Some("http://www.theguardian.com/yeah")
 
-      when(mockIdentityService.authenticate(argEq(email), argEq(password), argEq(rememberMe.isDefined), argAny[TrackingData])(argAny[ExecutionContext]))
+      when(mockAuthenticate(email, password))
         .thenReturn {
           Future.successful {
             Left(fakeBadRequestError("Invalid email or password"))
           }
         }
 
-      val result = call(controller.signIn, fakeSigninRequest(email, password, None, returnUrl))
+      val result = call(controller.signIn, fakeSigninRequest(email, password, returnUrl = returnUrl))
 
       status(result) mustEqual SEE_OTHER
       redirectLocation(result).get should startWith (signInPageUrl)
@@ -107,10 +134,9 @@ class SigninActionSpec extends PlaySpec with MockitoSugar {
     "redirect to sign in page when service error" in new WithControllerMockedDependencies {
       val email = Some("me@me.com")
       val password = Some("password")
-      val rememberMe = None
       val returnUrl = Some("http://www.theguardian.com/yeah")
 
-      when(mockIdentityService.authenticate(argEq(email), argEq(password), argEq(rememberMe.isDefined), argAny[TrackingData])(argAny[ExecutionContext]))
+      when(mockAuthenticate(email, password))
         .thenReturn {
           Future.successful {
             Left(fakeGatewayError())
@@ -128,10 +154,9 @@ class SigninActionSpec extends PlaySpec with MockitoSugar {
     "redirect to sign in page when error from future" in new WithControllerMockedDependencies {
       val email = Some("me@me.com")
       val password = Some("password")
-      val rememberMe = None
       val returnUrl = Some("http://www.theguardian.com/yeah")
 
-      when(mockIdentityService.authenticate(argEq(email), argEq(password), argEq(rememberMe.isDefined), argAny[TrackingData])(argAny[ExecutionContext]))
+      when(mockAuthenticate(email, password))
         .thenReturn {
           Future.failed {
             new RuntimeException("Unexpected 500 error")
