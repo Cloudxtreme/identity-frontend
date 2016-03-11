@@ -29,4 +29,13 @@ object RequestParameters {
     val rememberMe: Boolean
   }
 
+  type CoreSessionParameters =
+    ReturnUrlRequestParameter with
+    SkipConfirmationRequestParameter with
+    ClientIdRequestParameter
+
+  object CoreSessionParameters {
+    def unapply(params: CoreSessionParameters): Option[(ReturnUrl, Option[Boolean], Option[ClientID])] =
+      Some(params.returnUrl, params.skipConfirmation, params.clientId)
+  }
 }

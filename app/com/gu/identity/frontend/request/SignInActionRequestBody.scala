@@ -38,6 +38,8 @@ object SignInActionRequestBody {
     }
 
 
+  // Unfortunately need to throw errors here as play's parser syntax doesn't
+  // allow returning a typed error, only a result
   private def onParserErrors(form: Form[SignInActionRequestBody]): Result = throw {
     if (form.errors.size == 1) formErrorToAppException(form.errors.head)
     else SeqAppExceptions {

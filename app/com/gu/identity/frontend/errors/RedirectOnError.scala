@@ -1,5 +1,7 @@
 package com.gu.identity.frontend.errors
 
+import com.gu.identity.frontend.models.UrlBuilder
+import com.gu.identity.frontend.request.RequestParameters.CoreSessionParameters
 import com.gu.identity.frontend.utils.ComposableActionBuilder
 import play.api.mvc._
 import play.api.mvc.Results.SeeOther
@@ -33,9 +35,11 @@ case class RedirectOnError(route: String) extends ComposableActionBuilder[Reques
 
 
   override def composeParser[A](other: BodyParser[A]): BodyParser[A] =
-    BodyParser { request =>
-      other.apply(request).recover {
-        case ex: AppException => Left(SeeOther(route + s"?error=${ex.id.key}"))
+    BodyParser { requestHeader =>
+      other.apply(requestHeader).recover {
+        case ex: AppException => Left {
+          redirectResultFromAppException(request = Request(requestHeader, ()), ex)
+        }
       }(executionContext)
     }
 
@@ -48,8 +52,17 @@ case class RedirectOnError(route: String) extends ComposableActionBuilder[Reques
   }
 
 
-  // TODO: use URL builder to build error params
-  def redirectResultFromAppException[A](request: Request[A], error: AppException): Result =
-    SeeOther(route + s"?error=${error.id.key}")
+  def redirectResultFromAppException[A](request: Request[A], error: AppException): Result = {
+    val url = request.body match {
+      case CoreSessionParameters(returnUrl, skipConfirmation, clientId) =>
+        UrlBuilder(route, returnUrl, skipConfirmation, clientId, error)
+
+      case _ =>
+        UrlBuilder(route, error)
+    }
+
+    SeeOther(url)
+  }
+
 
 }
