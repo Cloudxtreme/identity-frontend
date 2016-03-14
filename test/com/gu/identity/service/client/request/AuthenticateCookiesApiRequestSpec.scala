@@ -1,7 +1,7 @@
 package com.gu.identity.service.client.request
 
 import com.gu.identity.frontend.models.TrackingData
-import com.gu.identity.service.client.{BadRequest, IdentityClientConfiguration, IdentityClientRequestHandler}
+import com.gu.identity.service.client.{ClientBadRequestError, IdentityClientConfiguration, IdentityClientRequestHandler}
 import org.scalatest.mock.MockitoSugar
 import org.scalatest.{Matchers, WordSpec}
 
@@ -62,7 +62,7 @@ class AuthenticateCookiesApiRequestSpec extends WordSpec with Matchers with Mock
       val result = AuthenticateCookiesApiRequest(email, password, rememberMe = false, trackingData)
 
       result.isLeft shouldBe true
-      result.left.get shouldBe a[BadRequest]
+      result.left.get shouldBe a[ClientBadRequestError]
     }
 
 
@@ -73,7 +73,7 @@ class AuthenticateCookiesApiRequestSpec extends WordSpec with Matchers with Mock
       val result = AuthenticateCookiesApiRequest(email, password, rememberMe = false, trackingData)
 
       result.isLeft shouldBe true
-      result.left.get shouldBe a[BadRequest]
+      result.left.get shouldBe a[ClientBadRequestError]
     }
 
     "Fail when given an empty email input" in {
@@ -83,7 +83,7 @@ class AuthenticateCookiesApiRequestSpec extends WordSpec with Matchers with Mock
       val result = AuthenticateCookiesApiRequest(email, password, rememberMe = false, trackingData)
 
       result.isLeft shouldBe true
-      result.left.get shouldBe a[BadRequest]
+      result.left.get shouldBe a[ClientBadRequestError]
     }
 
     "Fail when given an invalid password input" in {
@@ -93,7 +93,7 @@ class AuthenticateCookiesApiRequestSpec extends WordSpec with Matchers with Mock
       val result = AuthenticateCookiesApiRequest(email, password, rememberMe = false, trackingData)
 
       result.isLeft shouldBe true
-      result.left.get shouldBe a[BadRequest]
+      result.left.get shouldBe a[ClientBadRequestError]
     }
 
     "include X-Forwarded-For header on requests" in {

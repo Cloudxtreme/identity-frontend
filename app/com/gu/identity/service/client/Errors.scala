@@ -31,14 +31,14 @@ private object IdentityClientError {
     ).flatten.mkString(" ")
 }
 
-case class GatewayError(
+case class ClientGatewayError(
     message: String,
     description: Option[String] = None,
     context: Option[String] = None,
     cause: Option[Throwable] = None)
   extends AbstractIdentityClientError(message, description, context, cause)
 
-case class BadRequest(
+case class ClientBadRequestError(
     message: String,
     description: Option[String] = None,
     context: Option[String] = None,

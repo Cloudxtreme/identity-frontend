@@ -6,7 +6,7 @@ import com.gu.identity.frontend.errors.{RegisterServiceGatewayAppException, Regi
 import com.gu.identity.frontend.models.{ClientIp, TrackingData}
 import com.gu.identity.frontend.services.IdentityService
 import com.gu.identity.frontend.utils.UrlDecoder
-import com.gu.identity.service.client.{BadRequest, GatewayError}
+import com.gu.identity.service.client.{ClientBadRequestError, ClientGatewayError}
 import org.mockito.Matchers.{any => argAny, _}
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
@@ -61,10 +61,10 @@ class RegisterActionSpec extends PlaySpec with MockitoSugar {
     mockIdentityService.registerThenSignIn(anyObject(), argAny[ClientIp], argAny[TrackingData])(argAny[ExecutionContext])
 
   def fakeBadRequestError(message: String) =
-    Seq(RegisterServiceBadRequestException(BadRequest(message)))
+    Seq(RegisterServiceBadRequestException(ClientBadRequestError(message)))
 
   def fakeGatewayError(message: String = "Unexpected 500 error") =
-    Seq(RegisterServiceGatewayAppException(GatewayError(message)))
+    Seq(RegisterServiceGatewayAppException(ClientGatewayError(message)))
 
   "POST /register" should {
 

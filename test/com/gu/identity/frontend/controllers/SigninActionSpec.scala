@@ -6,7 +6,7 @@ import com.gu.identity.frontend.errors.{SignInServiceGatewayAppException, SignIn
 import com.gu.identity.frontend.models.TrackingData
 import com.gu.identity.frontend.request.RequestParameters.SignInRequestParameters
 import com.gu.identity.frontend.services._
-import com.gu.identity.service.client.{GatewayError, BadRequest}
+import com.gu.identity.service.client.{ClientGatewayError, ClientBadRequestError}
 import org.mockito.ArgumentMatcher
 import org.mockito.Mockito._
 import org.mockito.Matchers.{any => argAny, argThat}
@@ -80,10 +80,10 @@ class SigninActionSpec extends PlaySpec with MockitoSugar {
   }
 
   def fakeBadRequestError(message: String) =
-    Seq(SignInServiceBadRequestException(BadRequest(message)))
+    Seq(SignInServiceBadRequestException(ClientBadRequestError(message)))
 
   def fakeGatewayError(message: String = "Unexpected 500 error") =
-    Seq(SignInServiceGatewayAppException(GatewayError(message)))
+    Seq(SignInServiceGatewayAppException(ClientGatewayError(message)))
 
 
   "POST /signin" should {

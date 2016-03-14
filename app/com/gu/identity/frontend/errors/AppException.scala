@@ -1,6 +1,6 @@
 package com.gu.identity.frontend.errors
 
-import com.gu.identity.service.client.{BadRequest, GatewayError, IdentityClientError}
+import com.gu.identity.service.client.{ClientBadRequestError, ClientGatewayError, IdentityClientError}
 
 import scala.util.control.NoStackTrace
 
@@ -76,8 +76,8 @@ sealed trait SignInServiceAppException extends AppException
 object SignInServiceAppException {
   def apply(clientError: IdentityClientError): SignInServiceAppException =
     clientError match {
-      case err: BadRequest => SignInServiceBadRequestException(clientError)
-      case err: GatewayError => SignInServiceGatewayAppException(clientError)
+      case err: ClientBadRequestError => SignInServiceBadRequestException(clientError)
+      case err: ClientGatewayError => SignInServiceGatewayAppException(clientError)
     }
 }
 
@@ -105,8 +105,8 @@ sealed trait RegisterServiceAppException extends AppException
 object RegisterServiceAppException {
   def apply(clientError: IdentityClientError): RegisterServiceAppException =
     clientError match {
-      case err: BadRequest => RegisterServiceBadRequestException(clientError)
-      case err: GatewayError => RegisterServiceGatewayAppException(clientError)
+      case err: ClientBadRequestError => RegisterServiceBadRequestException(clientError)
+      case err: ClientGatewayError => RegisterServiceGatewayAppException(clientError)
     }
 }
 
