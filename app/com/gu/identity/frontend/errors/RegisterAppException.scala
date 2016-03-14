@@ -49,3 +49,35 @@ case object RegisterUsernameConflictAppException
 
   val id = RegisterUsernameConflictErrorID
 }
+
+case class RegisterActionInvalidUsernameAppException(message: String)
+  extends AbstractAppException(message)
+  with BadRequestAppException
+  with RegisterAppException {
+
+  val id = RegisterActionInvalidUsernameErrorID
+}
+
+case class RegisterActionInvalidPasswordAppException(message: String)
+  extends AbstractAppException(message)
+  with BadRequestAppException
+  with RegisterAppException {
+
+  val id = RegisterActionInvalidPasswordErrorID
+}
+
+case class RegisterActionInvalidGroupAppException(message: String)
+  extends AbstractAppException(message)
+  with BadRequestAppException
+  with RegisterAppException {
+
+  val id = RegisterActionInvalidGroupErrorID
+}
+
+case class RegisterActionBadRequestAppException(message: String)
+  extends AbstractAppException(message)
+  with BadRequestAppException
+  with RegisterAppException {
+
+  val id = RegisterActionBadRequestErrorID
+}

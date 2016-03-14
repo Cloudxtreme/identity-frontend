@@ -1,7 +1,7 @@
 package com.gu.identity.service.client.request
 
-import com.gu.identity.frontend.controllers.RegisterRequest
 import com.gu.identity.frontend.models.{ClientIp, TrackingData}
+import com.gu.identity.frontend.request.RegisterActionRequestBody
 import com.gu.identity.service.client._
 
 
@@ -12,7 +12,7 @@ case class RegisterApiRequest(url: String, extraHeaders: HttpParameters = Nil, t
 }
 
 object RegisterApiRequest {
-  def apply(request: RegisterRequest, clientIp: ClientIp, trackingData: TrackingData)(implicit configuration: IdentityClientConfiguration): RegisterApiRequest = {
+  def apply(request: RegisterActionRequestBody, clientIp: ClientIp, trackingData: TrackingData)(implicit configuration: IdentityClientConfiguration): RegisterApiRequest = {
     RegisterApiRequest(
       ApiRequest.apiEndpoint("user"),
       body = Some(RegisterRequestBody(
