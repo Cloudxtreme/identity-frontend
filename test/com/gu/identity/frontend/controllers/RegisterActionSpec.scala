@@ -51,7 +51,8 @@ class RegisterActionSpec extends PlaySpec with MockitoSugar {
       "receive3rdPartyMarketing" -> receive3rdPartyMarketing.toString,
       "returnUrl" -> returnUrl.getOrElse("http://none.com"),
       "skipConfirmation" -> skipConfirmation.getOrElse(false).toString,
-      "group" -> group.getOrElse(""))
+      "group" -> group.getOrElse(""),
+      "csrfToken" -> "~stubbedToken~")
 
     FakeRequest("POST", "/actions/register")
       .withFormUrlEncodedBody(bodyParams: _*)

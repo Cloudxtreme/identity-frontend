@@ -16,11 +16,13 @@ case class SignInActionRequestBody(
     returnUrl: ReturnUrl,
     skipConfirmation: Option[Boolean],
     clientId: Option[ClientID],
+    group: Option[String],
     csrfToken: String)
   extends SignInRequestParameters
   with ReturnUrlRequestParameter
   with SkipConfirmationRequestParameter
   with ClientIdRequestParameter
+  with GroupRequestParameter
   with CSRFTokenRequestParameter
 
 
@@ -66,6 +68,7 @@ object SignInActionRequestBody {
         "returnUrl" -> returnUrl(refererHeader, configuration),
         "skipConfirmation" -> optional(boolean),
         "clientId" -> optional(clientId),
+        "group" -> optional(text),
         "csrfToken" -> text
       )(SignInActionRequestBody.apply)(SignInActionRequestBody.unapply)
 

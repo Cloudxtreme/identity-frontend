@@ -2,7 +2,8 @@ package com.gu.identity.frontend.request
 
 import com.gu.identity.frontend.configuration.Configuration
 import com.gu.identity.frontend.errors._
-import com.gu.identity.frontend.models.ClientID
+import com.gu.identity.frontend.models.{ReturnUrl, ClientID}
+import com.gu.identity.frontend.request.RequestParameters._
 import play.api.data.Forms._
 import play.api.data.{FormError, Mapping, Form}
 import play.api.http.HeaderNames
@@ -17,10 +18,16 @@ case class RegisterActionRequestBody(
     password: String,
     receiveGnmMarketing: Boolean,
     receive3rdPartyMarketing: Boolean,
-    returnUrl: Option[String],
+    returnUrl: ReturnUrl,
     skipConfirmation: Option[Boolean],
     group: Option[String],
-    clientID: Option[ClientID])
+    clientId: Option[ClientID],
+    csrfToken: String)
+  extends ReturnUrlRequestParameter
+  with SkipConfirmationRequestParameter
+  with ClientIdRequestParameter
+  with GroupRequestParameter
+  with CSRFTokenRequestParameter
 
 object RegisterActionRequestBody {
 
@@ -54,6 +61,7 @@ object RegisterActionRequestBody {
 
   object FormMapping {
     import ClientID.FormMapping.clientId
+    import ReturnUrl.FormMapping.returnUrl
 
     private val username: Mapping[String] = text.verifying(
       "error.username", name => name.matches("[A-z0-9]+") && name.length > 5 && name.length < 21
@@ -76,10 +84,11 @@ object RegisterActionRequestBody {
         "password" -> password,
         "receiveGnmMarketing" -> boolean,
         "receive3rdPartyMarketing" -> boolean,
-        "returnUrl" -> optional(text),
+        "returnUrl" -> returnUrl(refererHeader, configuration),
         "skipConfirmation" -> optional(boolean),
         "group" -> optional(group),
-        "clientId" -> optional(clientId)
+        "clientId" -> optional(clientId),
+        "csrfToken" -> text
       )(RegisterActionRequestBody.apply)(RegisterActionRequestBody.unapply)
   }
 }

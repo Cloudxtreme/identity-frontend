@@ -23,16 +23,16 @@ object UrlBuilder {
     }
 
   def apply(baseUrl: String, returnUrl: ReturnUrl): String =
-    apply(baseUrl, returnUrl, skipConfirmation = None, clientId = None)
+    apply(baseUrl, returnUrl, skipConfirmation = None, clientId = None, group = None)
 
   def apply(baseUrl: String, returnUrl: ReturnUrl, clientId: Option[ClientID]): String =
-    apply(baseUrl, returnUrl, skipConfirmation = None, clientId)
+    apply(baseUrl, returnUrl, skipConfirmation = None, clientId, group = None)
 
-  def apply(baseUrl: String, returnUrl: ReturnUrl, skipConfirmation: Option[Boolean], clientId: Option[ClientID]): String =
-    apply(baseUrl, buildParams(Some(returnUrl), skipConfirmation, clientId))
+  def apply(baseUrl: String, returnUrl: ReturnUrl, skipConfirmation: Option[Boolean], clientId: Option[ClientID], group: Option[String]): String =
+    apply(baseUrl, buildParams(Some(returnUrl), skipConfirmation, clientId, group))
 
-  def apply(baseUrl: String, returnUrl: ReturnUrl, skipConfirmation: Option[Boolean], clientId: Option[ClientID], error: AppException): String =
-    apply(baseUrl, buildParams(Some(returnUrl), skipConfirmation, clientId, Some(error)))
+  def apply(baseUrl: String, returnUrl: ReturnUrl, skipConfirmation: Option[Boolean], clientId: Option[ClientID], group: Option[String], error: AppException): String =
+    apply(baseUrl, buildParams(Some(returnUrl), skipConfirmation, clientId, group, Some(error)))
 
   def apply(baseUrl: String, error: AppException): String =
     apply(baseUrl, buildParams(error = Some(error)))
@@ -41,21 +41,23 @@ object UrlBuilder {
     apply(call.url, params)
 
   def apply(call: Call, returnUrl: ReturnUrl, clientId: Option[ClientID]): String =
-    apply(call, returnUrl, None, clientId)
+    apply(call, returnUrl, None, clientId, None)
 
-  def apply(call: Call, returnUrl: ReturnUrl, skipConfirmation: Option[Boolean], clientId: Option[ClientID]): String =
-    apply(call.url, returnUrl, skipConfirmation, clientId)
+  def apply(call: Call, returnUrl: ReturnUrl, skipConfirmation: Option[Boolean], clientId: Option[ClientID], group: Option[String]): String =
+    apply(call.url, returnUrl, skipConfirmation, clientId, group)
 
 
   private def buildParams(
       returnUrl: Option[ReturnUrl] = None,
       skipConfirmation: Option[Boolean] = None,
       clientId: Option[ClientID] = None,
+      group: Option[String] = None,
       error: Option[AppException] = None): UrlParameters = {
     Seq(
       returnUrl.flatMap(_.toStringOpt).map("returnUrl" -> _),
       skipConfirmation.map("skipConfirmation" -> _.toString),
-      clientId.map("clientId" -> _.id)
+      clientId.map("clientId" -> _.id),
+      group.map("group" -> _)
     ).flatten ++ error.map(errorToUrlParameters).getOrElse(Seq.empty)
   }
 

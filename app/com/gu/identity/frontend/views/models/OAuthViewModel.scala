@@ -29,10 +29,10 @@ object OAuthProviderViewModel {
 
     provider match {
       case GoogleOAuth =>
-        OAuthProviderViewModel(provider.id, text.google, UrlBuilder(baseUrl, returnUrl, skipConfirmation, clientId))
+        OAuthProviderViewModel(provider.id, text.google, UrlBuilder(baseUrl, returnUrl, skipConfirmation, clientId, group = None))
 
       case FacebookOAuth =>
-        OAuthProviderViewModel(provider.id, text.facebook, UrlBuilder(baseUrl, returnUrl, skipConfirmation, clientId))
+        OAuthProviderViewModel(provider.id, text.facebook, UrlBuilder(baseUrl, returnUrl, skipConfirmation, clientId, group = None))
     }
   }
 
