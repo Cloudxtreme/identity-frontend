@@ -59,6 +59,17 @@ trait ClientBadRequestError extends IdentityClientError
 case object ClientInvalidCredentialsError
   extends AbstractIdentityClientError("Invalid email or password")
   with ClientBadRequestError
+  with NoStackTrace
+
+case object ClientRegistrationUsernameConflictError
+  extends AbstractIdentityClientError("Username in use", context = Some("user.publicFields.username"))
+  with ClientBadRequestError
+  with NoStackTrace
+
+case object ClientRegistrationEmailConflictError
+  extends AbstractIdentityClientError("Email in use", context = Some("user.primaryEmailAddress"))
+  with ClientBadRequestError
+  with NoStackTrace
 
 
 case class OtherClientBadRequestError(
@@ -67,7 +78,6 @@ case class OtherClientBadRequestError(
     override val context: Option[String] = None)
   extends AbstractIdentityClientError(message, description, context)
   with ClientBadRequestError
-  with NoStackTrace
 
 
 object ClientBadRequestError {
@@ -76,7 +86,9 @@ object ClientBadRequestError {
 
   def apply(message: String, description: Option[String], context: Option[String]): ClientBadRequestError =
     message match {
-      case "Invalid email or password" => ClientInvalidCredentialsError
+      case ClientInvalidCredentialsError.message => ClientInvalidCredentialsError
+      case ClientRegistrationUsernameConflictError.message => ClientRegistrationUsernameConflictError
+      case ClientRegistrationEmailConflictError.message => ClientRegistrationEmailConflictError
       case _ => OtherClientBadRequestError(message, description, context)
     }
 }

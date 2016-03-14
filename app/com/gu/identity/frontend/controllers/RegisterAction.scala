@@ -98,13 +98,8 @@ class RegisterAction(identityService: IdentityService, val messagesApi: Messages
     )
   }
 
-  private def checkUserDataIsUnique(error: AppException): String = {
-    /*error.message match {
-      case "Username in use" => "register-error-username-in-use"
-      case "Email in use" => "register-error-email-in-use"
-      case _ =>*/ s"register-${error.id}"
-    //}
-  }
+  private def checkUserDataIsUnique(error: AppException): String =
+    error.id.key
 
   private def registerSuccessRedirectUrl(cookies: Seq[PlayCookie], returnUrl: ReturnUrl, skipConfirmation: Option[Boolean], group: Option[String], clientId: Option[ClientID]) = {
     (group, skipConfirmation.getOrElse(false)) match {

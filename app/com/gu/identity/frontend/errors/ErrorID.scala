@@ -12,6 +12,9 @@ case object SignInInvalidCredentialsErrorID extends ErrorID { val key = "signin-
 case object RegisterGatewayErrorID extends ErrorID { val key = "register-error-gateway" }
 case object RegisterBadRequestErrorID extends ErrorID { val key = "register-error-bad-request" }
 
+case object RegisterEmailConflictErrorID extends ErrorID { val key = "register-error-email-conflict" }
+case object RegisterUsernameConflictErrorID extends ErrorID { val key = "register-error-username-conflict" }
+
 case object ForgeryTokenErrorID extends ErrorID { val key = "error-forgery-token" }
 
 case object SignInActionBadRequestErrorID extends ErrorID { val key = "signin-error-bad-request" }
