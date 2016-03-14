@@ -371,7 +371,7 @@ class RegisterActionSpec extends PlaySpec with MockitoSugar {
       status(result) mustEqual SEE_OTHER
 
       queryParams.contains("error") mustEqual true
-      queryParams.get("error") mustEqual Some("register-error-gateway")
+      queryParams.get("error") mustEqual Some("error-unexpected")
 
       redirectLocation(result).get must startWith (routes.Application.register(Seq.empty, None).url)
     }
