@@ -32,8 +32,10 @@ trait ServiceActionBuilder[+R[_]] extends ActionFunction[Request, R] {
   private def transformServiceResult(result: ServiceResult) = result match {
     case Right(r) => Future.successful(r)
 
+    case Left(error) if error.size == 1 => Future.failed(error.head)
+
     case Left(errors) if errors.nonEmpty => Future.failed {
-      errors.headOption.getOrElse(SeqAppExceptions(errors))
+      SeqAppExceptions(errors)
     }
 
     // Should be impossible, but covered just in case
