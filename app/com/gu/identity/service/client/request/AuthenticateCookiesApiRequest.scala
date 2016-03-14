@@ -37,9 +37,7 @@ object AuthenticateCookiesApiRequest {
       case (Some(e), Some(p)) if isValidEmail(e) && isValidPassword(p) => Right {
         apply(AuthenticateCookiesApiRequestBody(e, p), rememberMe, trackingData)
       }
-      case _ => Left {
-        ClientBadRequestError("Invalid request")
-      }
+      case _ => Left(ClientInvalidCredentialsError)
     }
 
 

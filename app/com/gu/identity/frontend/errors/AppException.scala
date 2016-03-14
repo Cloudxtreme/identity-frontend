@@ -1,6 +1,6 @@
 package com.gu.identity.frontend.errors
 
-import com.gu.identity.service.client.{ClientBadRequestError, ClientGatewayError, IdentityClientError}
+import com.gu.identity.service.client.{ClientInvalidCredentialsError, ClientBadRequestError, ClientGatewayError, IdentityClientError}
 
 import scala.util.control.NoStackTrace
 
@@ -11,6 +11,7 @@ sealed trait ErrorID {
 
 case object SignInGatewayErrorID extends ErrorID { val key = "signin-error-gateway" }
 case object SignInBadRequestErrorID extends ErrorID { val key = "signin-error-bad-request" }
+case object SignInInvalidCredentialsErrorID extends ErrorID { val key = "signin-error-credentials" }
 
 case object RegisterGatewayErrorID extends ErrorID { val key = "register-error-gateway" }
 case object RegisterBadRequestErrorID extends ErrorID { val key = "register-error-bad-request" }
@@ -76,6 +77,7 @@ sealed trait SignInServiceAppException extends AppException
 object SignInServiceAppException {
   def apply(clientError: IdentityClientError): SignInServiceAppException =
     clientError match {
+      case ClientInvalidCredentialsError => SignInInvalidCredentialsAppException
       case err: ClientBadRequestError => SignInServiceBadRequestException(clientError)
       case err: ClientGatewayError => SignInServiceGatewayAppException(clientError)
     }
@@ -97,6 +99,12 @@ case class SignInServiceBadRequestException(
   val id = SignInBadRequestErrorID
 }
 
+case object SignInInvalidCredentialsAppException
+  extends ServiceBadRequestAppException(ClientInvalidCredentialsError)
+  with SignInServiceAppException {
+
+  val id = SignInInvalidCredentialsErrorID
+}
 
 
 // Errors when Registering

@@ -106,20 +106,14 @@ class IdentityServiceRequestHandler (ws: WSClient) extends IdentityClientRequest
 
   def handleErrorResponse(response: WSResponse): IdentityClientErrors =
     response.json.asOpt[ApiErrorResponse]
-      .map(_.errors.map {
-        case e if isBadRequestError(response) => ClientBadRequestError(e.message, e.description, e.context)
-        case e => ClientGatewayError(e.message, e.description, e.context)
-      })
+      .map(
+        _.errors.map(error => IdentityClientError(response.status, error.message, error.description, error.context))
+      )
       .getOrElse {
         logger.warn(s"Unexpected error response: ${response.status} ${response.statusText} ${response.body}")
 
         Seq(
-          if (isBadRequestError(response)) {
-            ClientBadRequestError(s"Bad request: ${response.status} ${response.statusText}")
-
-          } else {
-            ClientGatewayError(s"Unknown error: ${response.status} ${response.statusText}")
-          }
+          IdentityClientError(response.status, s"Unexpected response: ${response.status} ${response.statusText}")
         )
       }
 
