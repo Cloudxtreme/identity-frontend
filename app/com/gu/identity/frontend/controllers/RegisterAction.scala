@@ -4,7 +4,7 @@ package com.gu.identity.frontend.controllers
 import com.gu.identity.frontend.configuration.Configuration
 import com.gu.identity.frontend.csrf.{CSRFConfig, CSRFCheck}
 import com.gu.identity.frontend.errors.RedirectOnError
-import com.gu.identity.frontend.logging.{MetricsLoggingActor, Logging}
+import com.gu.identity.frontend.logging.{LogOnErrorAction, MetricsLoggingActor, Logging}
 import com.gu.identity.frontend.models.{ClientID, UrlBuilder, ClientIp, TrackingData, ReturnUrl}
 import com.gu.identity.frontend.request.RegisterActionRequestBody
 import com.gu.identity.frontend.services.{ServiceAction, IdentityService}
@@ -21,6 +21,7 @@ class RegisterAction(identityService: IdentityService, val messagesApi: Messages
   val RegisterServiceAction =
     ServiceAction andThen
     RedirectOnError(redirectRoute) andThen
+    LogOnErrorAction(logger) andThen
     CSRFCheck(csrfConfig)
 
   val bodyParser = RegisterActionRequestBody.bodyParser(config)

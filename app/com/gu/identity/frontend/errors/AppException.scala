@@ -12,7 +12,11 @@ trait AppException extends Throwable {
   val id: ErrorID
 }
 
-case class SeqAppExceptions(errors: Seq[AppException]) extends AppException {
+case class SeqAppExceptions(errors: Seq[AppException])
+  extends AbstractAppException(
+    message = errors.map(_.getMessage).mkString(", "),
+    cause = errors.headOption)
+  with NoStackTrace {
   val id = errors.headOption.map(_.id).getOrElse(UnexpectedErrorID)
 }
 
@@ -52,6 +56,8 @@ case class UnexpectedAppException(
 
 
 // Forgery token errors (CSRF checks)
-case class ForgeryTokenAppException(message: String) extends AbstractAppException(message) {
+case class ForgeryTokenAppException(message: String)
+  extends AbstractAppException(message)
+  with BadRequestAppException {
   val id = ForgeryTokenErrorID
 }
