@@ -1,6 +1,6 @@
 package com.gu.identity.frontend.models
 
-import com.gu.identity.frontend.errors.AppException
+import com.gu.identity.frontend.errors.{SeqAppExceptions, AppException}
 import play.api.mvc.Call
 
 object UrlBuilder {
@@ -51,11 +51,17 @@ object UrlBuilder {
       returnUrl: Option[ReturnUrl] = None,
       skipConfirmation: Option[Boolean] = None,
       clientId: Option[ClientID] = None,
-      error: Option[AppException] = None): UrlParameters =
+      error: Option[AppException] = None): UrlParameters = {
     Seq(
       returnUrl.flatMap(_.toStringOpt).map("returnUrl" -> _),
       skipConfirmation.map("skipConfirmation" -> _.toString),
-      clientId.map("clientId" -> _.id),
-      error.map("error" -> _.id.key)
-    ).flatten
+      clientId.map("clientId" -> _.id)
+    ).flatten ++ error.map(errorToUrlParameters).getOrElse(Seq.empty)
+  }
+
+  private def errorToUrlParameters(error: AppException): UrlParameters =
+    error match {
+      case SeqAppExceptions(errors) => errors.flatMap(errorToUrlParameters)
+      case e => Seq("error" -> e.id.key)
+    }
 }

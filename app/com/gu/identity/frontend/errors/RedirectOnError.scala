@@ -45,7 +45,6 @@ case class RedirectOnError(route: String) extends ComposableActionBuilder[Reques
 
 
   def recoverExceptions[A](request: Request[A]) = PartialFunction[Throwable, Result] {
-    case SeqAppExceptions(errors) => SeeOther(route + "?error=multi")
     case ex: AppException => redirectResultFromAppException(request, ex)
     case NonFatal(ex) =>
       redirectResultFromAppException(request, UnexpectedAppException(s"Unexpected error: ${ex.getMessage}", Some(ex)))

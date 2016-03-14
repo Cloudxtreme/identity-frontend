@@ -12,7 +12,7 @@ case class ReturnUrl private[models](
   lazy val url: String = uri.toString
 
   lazy val toStringOpt: Option[String] =
-    Some(url).filter(_ => isDefault)
+    Some(url).filterNot(_ => isDefault)
 }
 
 object ReturnUrl {
