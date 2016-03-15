@@ -1,6 +1,7 @@
 package com.gu.identity.frontend.errors
 
 import com.gu.identity.service.client._
+import ErrorIDs._
 
 /**
  * Errors which may occur during Registration process.
@@ -48,6 +49,30 @@ case object RegisterUsernameConflictAppException
   with RegisterServiceAppException {
 
   val id = RegisterUsernameConflictErrorID
+}
+
+case class RegisterActionInvalidFirstNameAppException(message: String)
+  extends AbstractAppException(message)
+  with BadRequestAppException
+  with RegisterAppException {
+
+  val id = RegisterActionInvalidFirstNameErrorID
+}
+
+case class RegisterActionInvalidLastNameAppException(message: String)
+  extends AbstractAppException(message)
+  with BadRequestAppException
+  with RegisterAppException {
+
+  val id = RegisterActionInvalidLastNameErrorID
+}
+
+case class RegisterActionInvalidEmailAppException(message: String)
+  extends AbstractAppException(message)
+  with BadRequestAppException
+  with RegisterAppException {
+
+  val id = RegisterActionInvalidEmailErrorID
 }
 
 case class RegisterActionInvalidUsernameAppException(message: String)

@@ -1,6 +1,7 @@
 package com.gu.identity.frontend.errors
 
 import com.gu.identity.service.client.{ClientGatewayError, ClientBadRequestError, ClientInvalidCredentialsError, IdentityClientError}
+import ErrorIDs._
 
 /**
  * Errors which may occur during the Sign in process.
@@ -49,4 +50,12 @@ case class SignInActionBadRequestAppException(message: String)
   with SignInAppException {
 
   val id = SignInActionBadRequestErrorID
+}
+
+case class SignInActionInvalidCaptchaAppException(message: String)
+  extends AbstractAppException(message)
+  with BadRequestAppException
+  with SignInAppException {
+
+  val id = SignInInvalidCaptchaErrorID
 }

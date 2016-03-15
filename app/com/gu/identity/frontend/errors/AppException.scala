@@ -1,6 +1,7 @@
 package com.gu.identity.frontend.errors
 
 import com.gu.identity.service.client.IdentityClientError
+import ErrorIDs._
 
 import scala.util.control.NoStackTrace
 

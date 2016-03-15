@@ -52,6 +52,9 @@ object RegisterActionRequestBody {
 
   private def formErrorToAppException(formError: FormError): AppException = formError match {
     case FormError("csrfToken", _, _) => ForgeryTokenAppException("Missing csrfToken on request")
+    case FormError("firstName", msg, _) => RegisterActionInvalidFirstNameAppException(msg.headOption.getOrElse("unknown"))
+    case FormError("lastName", msg, _) => RegisterActionInvalidLastNameAppException(msg.headOption.getOrElse("unknown"))
+    case FormError("email", msg, _) => RegisterActionInvalidEmailAppException(msg.headOption.getOrElse("unknown"))
     case FormError("username", msg, _) => RegisterActionInvalidUsernameAppException(msg.headOption.getOrElse("unknown"))
     case FormError("password", msg, _) => RegisterActionInvalidPasswordAppException(msg.headOption.getOrElse("unknown"))
     case FormError("group", msg, _) => RegisterActionInvalidGroupAppException(msg.headOption.getOrElse("unknown"))
