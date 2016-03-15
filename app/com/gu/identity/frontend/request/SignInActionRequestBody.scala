@@ -1,7 +1,7 @@
 package com.gu.identity.frontend.request
 
 import com.gu.identity.frontend.configuration.Configuration
-import com.gu.identity.frontend.errors.{SeqAppExceptions, AppException, SignInActionBadRequestAppException, ForgeryTokenAppException}
+import com.gu.identity.frontend.errors._
 import com.gu.identity.frontend.models.{ClientID, ReturnUrl}
 import com.gu.identity.frontend.request.RequestParameters._
 import play.api.data.{Mapping, FormError, Form}
@@ -10,8 +10,8 @@ import play.api.http.HeaderNames
 
 
 case class SignInActionRequestBody(
-    email: Option[String],
-    password: Option[String],
+    email: String,
+    password: String,
     rememberMe: Boolean,
     returnUrl: ReturnUrl,
     skipConfirmation: Option[Boolean],
@@ -50,6 +50,8 @@ object SignInActionRequestBody {
   }
 
   private def formErrorToAppException(formError: FormError): AppException = formError match {
+    case FormError("email", _, _) => SignInInvalidCredentialsAppException
+    case FormError("password", _, _) => SignInInvalidCredentialsAppException
     case FormError("csrfToken", _, _) => ForgeryTokenAppException("Missing csrfToken on request")
     case e => SignInActionBadRequestAppException(s"Unexpected error: ${e.message}")
   }
@@ -62,8 +64,8 @@ object SignInActionRequestBody {
 
     def signInForm(configuration: Configuration, refererHeader: Option[String]): Mapping[SignInActionRequestBody] =
       mapping(
-        "email" -> optional(text),
-        "password" -> optional(text),
+        "email" -> text,
+        "password" -> text,
         "rememberMe" -> default(boolean, false),
         "returnUrl" -> returnUrl(refererHeader, configuration),
         "skipConfirmation" -> optional(boolean),

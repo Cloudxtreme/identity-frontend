@@ -28,8 +28,8 @@ object RequestParameters {
   }
 
   trait SignInRequestParameters extends RequestParameter {
-    val email: Option[String]
-    val password: Option[String]
+    val email: String
+    val password: String
     val rememberMe: Boolean
   }
 

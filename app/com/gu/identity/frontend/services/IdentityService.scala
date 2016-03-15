@@ -65,14 +65,7 @@ class IdentityServiceImpl(config: Configuration, adapter: IdentityServiceRequest
     register(request, clientIp, trackingData).flatMap{
       case Left(errors) => Future.successful(Left(errors))
       case Right(user) => {
-        // TODO use Request Parameter types for Register Request
-        val authRequest = new SignInRequestParameters {
-          val email: Option[String] = Some(request.email)
-          val password: Option[String] = Some(request.password)
-          val rememberMe: Boolean = true
-        }
-
-        authenticate(authRequest, trackingData).map {
+        authenticate(request, trackingData).map {
           case Left(signInErrors) => {
             logger.error(s"User could not be logged in after registering: $signInErrors")
             signInErrors.foreach { err =>

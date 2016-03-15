@@ -34,8 +34,8 @@ class SigninActionSpec extends PlaySpec with MockitoSugar {
     lazy val controller = new SigninAction(mockIdentityService, messages, fakeCsrfConfig, config)
 
     def mockAuthenticate(
-        email: Option[String] = None,
-        password: Option[String] = None,
+        email: String,
+        password: String,
         rememberMe: Boolean = false) = {
 
       val mockRequest = MockSignInRequest(email, password, rememberMe)
@@ -47,7 +47,7 @@ class SigninActionSpec extends PlaySpec with MockitoSugar {
     }
   }
 
-  private case class MockSignInRequest(email: Option[String], password: Option[String], rememberMe: Boolean)
+  private case class MockSignInRequest(email: String, password: String, rememberMe: Boolean)
     extends SignInRequestParameters
 
   def signInRequestParamsMatcher(expect: SignInRequestParameters) =
@@ -89,8 +89,8 @@ class SigninActionSpec extends PlaySpec with MockitoSugar {
   "POST /signin" should {
 
     "redirect to returnUrl when passed authentication" in new WithControllerMockedDependencies {
-      val email = Some("me@me.com")
-      val password = Some("password")
+      val email = "me@me.com"
+      val password = "password"
       val returnUrl = Some("http://www.theguardian.com/yeah")
 
       val testCookie = Cookie("SC_GU_U", "##hash##")
@@ -102,7 +102,7 @@ class SigninActionSpec extends PlaySpec with MockitoSugar {
           }
         }
 
-      val result = call(controller.signIn, fakeSigninRequest(email, password, returnUrl = returnUrl))
+      val result = call(controller.signIn, fakeSigninRequest(Some(email), Some(password), returnUrl = returnUrl))
       val resultCookies = cookies(result)
 
       status(result) mustEqual SEE_OTHER
@@ -113,8 +113,8 @@ class SigninActionSpec extends PlaySpec with MockitoSugar {
     }
 
     "redirect to sign in page when failed authentication" in new WithControllerMockedDependencies {
-      val email = Some("me@me.com")
-      val password = Some("password")
+      val email = "me@me.com"
+      val password = "password"
       val returnUrl = Some("http://www.theguardian.com/yeah")
 
       when(mockAuthenticate(email, password))
@@ -124,7 +124,7 @@ class SigninActionSpec extends PlaySpec with MockitoSugar {
           }
         }
 
-      val result = call(controller.signIn, fakeSigninRequest(email, password, returnUrl = returnUrl))
+      val result = call(controller.signIn, fakeSigninRequest(Some(email), Some(password), returnUrl = returnUrl))
 
       status(result) mustEqual SEE_OTHER
       redirectLocation(result).get should startWith (signInPageUrl)
@@ -132,8 +132,8 @@ class SigninActionSpec extends PlaySpec with MockitoSugar {
     }
 
     "redirect to sign in page when service error" in new WithControllerMockedDependencies {
-      val email = Some("me@me.com")
-      val password = Some("password")
+      val email = "me@me.com"
+      val password = "password"
       val returnUrl = Some("http://www.theguardian.com/yeah")
 
       when(mockAuthenticate(email, password))
@@ -143,7 +143,7 @@ class SigninActionSpec extends PlaySpec with MockitoSugar {
           }
         }
 
-      val result = call(controller.signIn, fakeSigninRequest(email, password, None, returnUrl))
+      val result = call(controller.signIn, fakeSigninRequest(Some(email), Some(password), None, returnUrl))
 
       status(result) mustEqual SEE_OTHER
       redirectLocation(result).value should startWith (signInPageUrl)
@@ -152,8 +152,8 @@ class SigninActionSpec extends PlaySpec with MockitoSugar {
 
 
     "redirect to sign in page when error from future" in new WithControllerMockedDependencies {
-      val email = Some("me@me.com")
-      val password = Some("password")
+      val email = "me@me.com"
+      val password = "password"
       val returnUrl = Some("http://www.theguardian.com/yeah")
 
       when(mockAuthenticate(email, password))
@@ -163,7 +163,7 @@ class SigninActionSpec extends PlaySpec with MockitoSugar {
           }
         }
 
-      val result = call(controller.signIn, fakeSigninRequest(email, password, None, returnUrl))
+      val result = call(controller.signIn, fakeSigninRequest(Some(email), Some(password), None, returnUrl))
 
       status(result) mustEqual SEE_OTHER
       redirectLocation(result).value should startWith (signInPageUrl)
