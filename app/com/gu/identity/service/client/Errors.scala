@@ -64,7 +64,10 @@ case object ClientInvalidCredentialsError
 case object ClientRegistrationUsernameConflictError
   extends AbstractIdentityClientError("Username in use", context = Some("user.publicFields.username"))
   with ClientBadRequestError
-  with NoStackTrace
+  with NoStackTrace {
+
+  val messageForReservedUser = "Reserved user name"
+}
 
 case object ClientRegistrationEmailConflictError
   extends AbstractIdentityClientError("Email in use", context = Some("user.primaryEmailAddress"))
@@ -88,6 +91,7 @@ object ClientBadRequestError {
     message match {
       case ClientInvalidCredentialsError.message => ClientInvalidCredentialsError
       case ClientRegistrationUsernameConflictError.message => ClientRegistrationUsernameConflictError
+      case ClientRegistrationUsernameConflictError.messageForReservedUser => ClientRegistrationUsernameConflictError
       case ClientRegistrationEmailConflictError.message => ClientRegistrationEmailConflictError
       case _ => OtherClientBadRequestError(message, description, context)
     }
