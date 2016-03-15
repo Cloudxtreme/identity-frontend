@@ -1,5 +1,6 @@
 package com.gu.identity.service.client
 
+import com.gu.identity.frontend.authentication.IdentityCookie
 import com.gu.identity.frontend.models.TrackingData
 import com.gu.identity.service.client.request._
 import com.gu.identity.service.client.models.User
@@ -18,7 +19,7 @@ class IdentityClient extends Logging {
       case Left(error) => Left(error)
       case Right(AuthenticationCookiesResponse(cookies)) =>
         Right(cookies.values.map { c =>
-          IdentityCookie(c.key, c.value, c.sessionCookie.getOrElse(false), cookies.expiresAt)
+          IdentityCookie(name = c.key, value = c.value, isSession = c.sessionCookie.getOrElse(false), expires = cookies.expiresAt)
         })
       case Right(other) => Left(Seq(GatewayError("Unknown response")))
     }
@@ -59,6 +60,19 @@ class IdentityClient extends Logging {
         logger.info("Successfully sent reset password email request")
         Right(r)
       }
+      case Right(other) => Left(Seq(GatewayError("Unknown response")))
+    }
+  }
+
+  def deauthenticate(request: DeauthenticateApiRequest)(implicit configuration: IdentityClientConfiguration, ec: ExecutionContext): Future[Either[IdentityClientErrors, Seq[IdentityCookie]]] = {
+    configuration.requestHandler.handleRequest(request).map {
+      case Left(error) => Left(error)
+      case Right(response: DeauthenticationCookiesResponse) => Right({
+        val expiresAt = response.cookies.expiresAt
+        response.cookies.values.map { c =>
+          IdentityCookie(name = c.key, value = c.value, isSession = false, expires = expiresAt)
+        }
+      })
       case Right(other) => Left(Seq(GatewayError("Unknown response")))
     }
   }

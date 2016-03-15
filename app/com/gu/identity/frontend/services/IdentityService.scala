@@ -1,12 +1,13 @@
 package com.gu.identity.frontend.services
 
+import com.gu.identity.frontend.authentication.CookieService
 import com.gu.identity.frontend.configuration.Configuration
 import com.gu.identity.frontend.controllers.RegisterRequest
 import com.gu.identity.frontend.controllers.ResetPasswordData
 import com.gu.identity.frontend.models.{ClientIp, TrackingData}
 import com.gu.identity.service.client.models.User
 import com.gu.identity.service.client._
-import com.gu.identity.service.client.request.{SendResetPasswordEmailApiRequest, UserApiRequest, AssignGroupApiRequest, RegisterApiRequest}
+import com.gu.identity.service.client.request._
 import org.joda.time.{DateTime, Seconds}
 import play.api.mvc.{Cookie => PlayCookie}
 
@@ -20,6 +21,7 @@ import scala.concurrent.{ExecutionContext, Future}
  */
 trait IdentityService {
   def authenticate(email: Option[String], password: Option[String], rememberMe: Boolean, trackingData: TrackingData)(implicit ec: ExecutionContext): Future[Either[Seq[ServiceError], Seq[PlayCookie]]]
+  def deauthenticate(cookie: PlayCookie, trackingData: TrackingData)(implicit ec: ExecutionContext): Future[Either[Seq[ServiceError], Seq[PlayCookie]]]
   def registerThenSignIn(request:RegisterRequest, clientIp: ClientIp, trackingData: TrackingData)(implicit ec: ExecutionContext): Future[Either[Seq[ServiceError], Seq[PlayCookie]]]
   def register(request: RegisterRequest, clientIp: ClientIp, trackingData: TrackingData)(implicit ec: ExecutionContext): Future[Either[Seq[ServiceError], RegisterResponseUser]]
   def sendResetPasswordEmail(data: ResetPasswordData, clientIp: ClientIp)(implicit ec: ExecutionContext): Future[Either[Seq[ServiceError], SendResetPasswordEmailResponse ]]
@@ -40,13 +42,20 @@ class IdentityServiceImpl(config: Configuration, adapter: IdentityServiceRequest
           case e: GatewayError => ServiceGatewayError(e.message, e.description)
         }
       }
-      case Right(cookies) => Right(cookies.map { c =>
-        val maxAge = if (rememberMe) Some(Seconds.secondsBetween(DateTime.now, c.expires).getSeconds) else None
-        val secureHttpOnly = c.key.startsWith("SC_")
-        val cookieMaxAgeOpt = maxAge.filterNot(_ => c.isSession)
+      case Right(cookies) => Right(CookieService.signInCookies(cookies, rememberMe)(config))
+    }
+  }
 
-        PlayCookie(c.key, c.value, cookieMaxAgeOpt, "/", Some(config.identityCookieDomain), secure = secureHttpOnly, httpOnly = secureHttpOnly)
-      })
+  override def deauthenticate(cookie: PlayCookie, trackingData: TrackingData)(implicit ec: ExecutionContext) = {
+    val apiRequest = DeauthenticateApiRequest(cookie, trackingData)
+    client.deauthenticate(apiRequest).map {
+      case Left(errors) => Left {
+        errors.map {
+          case e: BadRequest => ServiceBadRequest(e.message, e.description)
+          case e: GatewayError => ServiceGatewayError(e.message, e.description)
+        }
+      }
+      case Right(cookies) => Right(CookieService.signOutCookies(cookies)(config))
     }
   }
 

@@ -13,6 +13,8 @@ GET        /reset                         com.gu.identity.frontend.controllers.A
 
 GET        /reset/email-sent              com.gu.identity.frontend.controllers.Application.resetPasswordEmailSent(clientId: Option[String] ?= None)
 
+GET        /signout                       com.gu.identity.frontend.controllers.SignOutAction.signOut(returnUrl: Option[String] ?= None)
+
 GET        /agree/:group                  com.gu.identity.frontend.controllers.ThirdPartyTsAndCs.confirmAction(group: String, returnUrl: Option[String] ?= None, clientId: Option[String] ?= None, skipThirdPartyLandingPage: Option[Boolean] ?= None)
 
 POST       /actions/agree                 com.gu.identity.frontend.controllers.ThirdPartyTsAndCs.addToGroupAction
@@ -35,4 +37,5 @@ GET        /static/*file                  controllers.Assets.versioned(path="/pu
 # Redirects
 GET        /                              com.gu.identity.frontend.controllers.Redirects.indexRedirect
 GET        /signin/                       com.gu.identity.frontend.controllers.Redirects.signInPageTrailingSlash
+GET        /signout/                      com.gu.identity.frontend.controllers.Redirects.signOutPageTrailingSlash
 GET        /register/                     com.gu.identity.frontend.controllers.Redirects.registerPageTrailingSlash

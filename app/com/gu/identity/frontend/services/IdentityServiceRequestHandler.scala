@@ -20,9 +20,13 @@ class IdentityServiceRequestHandler (ws: WSClient) extends IdentityClientRequest
   implicit val apiErrorResponseErrorReads = Json.format[ApiErrorResponseError]
   implicit val apiErrorResponseReads = Json.format[ApiErrorResponse]
 
-  implicit val responseCookieReads = Json.format[AuthenticationCookiesResponseCookie]
-  implicit val responseCookiesListReads = Json.format[AuthenticationCookiesResponseCookieList]
-  implicit val responseReads = Json.format[AuthenticationCookiesResponse]
+  implicit val authenticationCookieReads = Json.format[AuthenticationCookiesResponseCookie]
+  implicit val authenticationCookiesListReads = Json.format[AuthenticationCookiesResponseCookieList]
+  implicit val authenticationReads = Json.format[AuthenticationCookiesResponse]
+
+  implicit val deauthenticationCookieReads = Json.format[DeauthenticationCookiesResponseCookie]
+  implicit val deauthenticationCookiesListReads = Json.format[DeauthenticationCookiesResponseCookieList]
+  implicit val deauthenticationReads = Json.format[DeauthenticationCookiesResponse]
 
   implicit val registerRequestBodyPublicFieldsFormat = Json.format[RegisterRequestBodyPublicFields]
   implicit val registerRequestBodyPrivateFieldsFormat = Json.format[RegisterRequestBodyPrivateFields]
@@ -98,6 +102,11 @@ class IdentityServiceRequestHandler (ws: WSClient) extends IdentityClientRequest
 
     case r: AssignGroupApiRequest =>
       response.json.asOpt[AssignGroupResponse]
+        .map(Right.apply)
+        .getOrElse(handleUnexpectedResponse(response))
+
+    case r: DeauthenticateApiRequest =>
+      response.json.asOpt[DeauthenticationCookiesResponse]
         .map(Right.apply)
         .getOrElse(handleUnexpectedResponse(response))
 

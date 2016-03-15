@@ -48,11 +48,11 @@ class AuthenticationServiceSpec extends PlaySpec {
     }
   }
 
-  "Deauthenticate" should {
+  "terminateSession" should {
 
     "return a response where all cookies have no value" in {
       val cookielessRequest = requestWithCookies(Seq.empty)
-      val result = AuthenticationService.deauthenticate(cookielessRequest, "www.theguardian.com", "www.theguardian.com")
+      val result = AuthenticationService.terminateSession(cookielessRequest, "www.theguardian.com", "www.theguardian.com")
       val resultCookies = cookies(Future.successful(result))
       resultCookies.get(CookieName.gu_user_features_expiry).value.value.isEmpty mustBe true
       resultCookies.get(CookieName.gu_paying_member).value.value.isEmpty mustBe true
@@ -64,7 +64,7 @@ class AuthenticationServiceSpec extends PlaySpec {
     "return a response with a GU_TEST cookie" in {
       val cookielessRequest = requestWithCookies(Seq.empty)
       val testCookie = Seq(createCookie("test_value", "GU_TEST"))
-      val result = AuthenticationService.deauthenticate(cookielessRequest, "www.theguardian.com", "www.theguardian.com", testCookie)
+      val result = AuthenticationService.terminateSession(cookielessRequest, "www.theguardian.com", "www.theguardian.com", testCookie)
       val resultCookies = cookies(Future.successful(result))
       resultCookies.get(CookieName.gu_user_features_expiry).value.value.isEmpty mustBe true
       resultCookies.get(CookieName.gu_paying_member).value.value.isEmpty mustBe true

@@ -7,6 +7,7 @@ import play.api.mvc.{Call, Action, Controller}
 final class Redirects extends Controller with Logging {
 
   lazy val signInRoute: Call = routes.Application.signIn()
+  lazy val signOutRoute: Call = routes.SignOutAction.signOut()
   lazy val registerRoute: Call = routes.Application.register()
 
 
@@ -17,6 +18,8 @@ final class Redirects extends Controller with Logging {
   def signInPageTrailingSlash =
     redirectToRoute(signInRoute, isLegacy = true)
 
+  def signOutPageTrailingSlash =
+    redirectToRoute(signOutRoute, isLegacy = true)
 
   def registerPageTrailingSlash =
     redirectToRoute(registerRoute, isLegacy = true)

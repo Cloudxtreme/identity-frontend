@@ -17,6 +17,4 @@ package object client {
 
   case class IdentityClientConfiguration(host: String, apiKey: String, requestHandler: IdentityClientRequestHandler)
 
-  case class IdentityCookie(key: String, value: String, isSession: Boolean, expires: DateTime)
-
 }

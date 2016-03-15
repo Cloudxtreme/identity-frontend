@@ -43,6 +43,7 @@ class ApplicationComponents(context: Context) extends BuiltInComponentsFromConte
   lazy val googleRecaptchaServiceHandler = new GoogleRecaptchaServiceHandler(wsClient, frontendConfiguration)
   lazy val googleRecaptchaCheck = new GoogleRecaptchaCheck(googleRecaptchaServiceHandler)
   lazy val signinController = new SigninAction(identityService, messagesApi, csrfConfig, googleRecaptchaCheck, frontendConfiguration)
+  lazy val signOutController = new SignOutAction(identityService, frontendConfiguration, messagesApi, httpErrorHandler)
   lazy val registerController = new RegisterAction(identityService, messagesApi, frontendConfiguration, csrfConfig)
   lazy val thirdPartyTsAndCsController = new ThirdPartyTsAndCs(identityService, identityCookieDecoder, frontendConfiguration, messagesApi, httpErrorHandler)
   lazy val resetPasswordController = new ResetPasswordAction(identityService, csrfConfig)
@@ -64,5 +65,5 @@ class ApplicationComponents(context: Context) extends BuiltInComponentsFromConte
 
   applicationLifecycle.addStopHook(() => terminateActor()(defaultContext))
 
-  override lazy val router: Router = new Routes(httpErrorHandler, applicationController,thirdPartyTsAndCsController, signinController, registerController, resetPasswordController, cspReporterController, healthcheckController, manifestController, assets, redirects)
+  override lazy val router: Router = new Routes(httpErrorHandler, applicationController, signOutController, thirdPartyTsAndCsController, signinController, registerController, resetPasswordController, cspReporterController, healthcheckController, manifestController, assets, redirects)
 }

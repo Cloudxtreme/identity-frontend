@@ -5,7 +5,7 @@ import com.gu.identity.model.User
 import play.api.mvc.{Result, Cookie, DiscardingCookie, RequestHeader}
 import play.api.mvc.Results._
 
-
+case class AuthenticatedUser(userId: String)
 
 object AuthenticationService {
 
@@ -17,19 +17,18 @@ object AuthenticationService {
     userId <- Option(minimalSecureUser.getId)
   } yield AuthenticatedUser(userId)
 
-
-  def deauthenticate(
+  def terminateSession(
       request: RequestHeader,
       verifiedReturnUrl: String,
       cookieDomain: String,
       newCookies: Seq[Cookie] = Seq.empty): Result = {
 
     val cookiesToDiscard: Seq[DiscardingCookie] = Seq(
-      GuardianCookie(CookieName.gu_user_features_expiry, secure = false),
-      GuardianCookie(CookieName.gu_paying_member, secure = false),
-      GuardianCookie(CookieName.GU_U, secure = false),
-      GuardianCookie(CookieName.SC_GU_U, secure = true),
-      GuardianCookie(CookieName.GU_ID_CSRF, secure = true)
+      DotComCookie(CookieName.gu_user_features_expiry, secure = false),
+      DotComCookie(CookieName.gu_paying_member, secure = false),
+      DotComCookie(CookieName.GU_ID_CSRF, secure = true),
+      DotComCookie(CookieName.GU_U, secure = false),
+      DotComCookie(CookieName.SC_GU_U, secure = true)
     ).map(cookie => DiscardingCookie(cookie.name, "/", Some(cookieDomain), secure = cookie.secure))
 
     Found(verifiedReturnUrl)
@@ -39,4 +38,4 @@ object AuthenticationService {
   }
 }
 
-case class AuthenticatedUser(userId: String)
+
