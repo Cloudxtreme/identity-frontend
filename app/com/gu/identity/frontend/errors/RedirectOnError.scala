@@ -1,5 +1,6 @@
 package com.gu.identity.frontend.errors
 
+import com.gu.identity.frontend.controllers.NoCache
 import com.gu.identity.frontend.models.UrlBuilder
 import com.gu.identity.frontend.request.RequestParameters.CoreSessionParameters
 import com.gu.identity.frontend.utils.ErrorRecoveryActionBuilder
@@ -33,7 +34,7 @@ case class RedirectOnError(route: String) extends ErrorRecoveryActionBuilder {
     }
 
     Future.successful {
-      SeeOther(url)
+      NoCache(SeeOther(url))
     }
   }
 

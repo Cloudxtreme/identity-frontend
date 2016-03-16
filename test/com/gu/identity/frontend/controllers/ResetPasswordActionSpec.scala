@@ -2,9 +2,10 @@ package com.gu.identity.frontend.controllers
 
 import com.gu.identity.frontend.configuration.Configuration
 import com.gu.identity.frontend.csrf.CSRFConfig
+import com.gu.identity.frontend.errors.ResetPasswordServiceGatewayAppException
 import com.gu.identity.frontend.models.ClientIp
-import com.gu.identity.frontend.services.{ServiceGatewayError, IdentityService}
-import com.gu.identity.service.client.{SendResetPasswordEmailResponse}
+import com.gu.identity.frontend.services.IdentityService
+import com.gu.identity.service.client.{ClientGatewayError, SendResetPasswordEmailResponse}
 import org.scalatest.mock.MockitoSugar
 import org.mockito.Matchers.{eq => argEq, any => argAny}
 import org.mockito.Mockito._
@@ -22,6 +23,9 @@ class ResetPasswordActionSpec extends PlaySpec with MockitoSugar {
     val config = Configuration.testConfiguration
     lazy val controller = new ResetPasswordAction(mockIdentityService, fakeCsrfConfig)
   }
+
+  def fakeGatewayError(message: String = "Unexpected 500 error") =
+    Seq(ResetPasswordServiceGatewayAppException(ClientGatewayError(message)))
 
   "POST /actions/reset" should {
     "redirect to the email validation sent confirmation page when email was properly sent" in new WithControllerMockedDependencies {
@@ -75,7 +79,7 @@ class ResetPasswordActionSpec extends PlaySpec with MockitoSugar {
       val result = call(controller.reset, fakeRequest)
 
       status(result) mustEqual SEE_OTHER
-      redirectLocation(result) mustEqual Some("/reset?error=reset-password-error-gateway")
+      redirectLocation(result) mustEqual Some("/reset?error=error-unexpected")
       header("Cache-Control", result) mustEqual Some("no-cache, private")
     }
   }
@@ -90,7 +94,7 @@ class ResetPasswordActionSpec extends PlaySpec with MockitoSugar {
       when(mockIdentityService.sendResetPasswordEmail(argAny[ResetPasswordData], argAny[ClientIp])(argAny[ExecutionContext]))
         .thenReturn {
           Future.successful {
-            Left(Seq(ServiceGatewayError("unknown")))
+            Left(fakeGatewayError())
           }
         }
 
