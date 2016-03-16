@@ -35,13 +35,14 @@ class SigninAction(identityService: IdentityService, val messagesApi: MessagesAp
   def signIn = SignInServiceAction(bodyParser) { request: Request[SignInActionRequestBody] =>
     val formParams = request.body
 
-    val trackingData = TrackingData(request, formParams.returnUrl)
+    val trackingData = TrackingData(request, formParams.returnUrl.flatMap(_.toStringOpt))
+    lazy val returnUrl = formParams.returnUrl.getOrElse(ReturnUrl.defaultForClient(config, formParams.clientId))
 
     identityService.authenticate(formParams, trackingData).map {
       case Left(errors) => Left(errors)
       case Right(cookies) => Right {
         logSuccessfulSignin()
-        SeeOther(formParams.returnUrl.url)
+        SeeOther(returnUrl.url)
           .withCookies(cookies: _*)
       }
     }

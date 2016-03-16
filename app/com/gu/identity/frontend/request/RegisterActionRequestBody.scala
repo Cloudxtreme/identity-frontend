@@ -10,7 +10,7 @@ import play.api.http.HeaderNames
 import play.api.mvc.{Result, BodyParsers, BodyParser}
 
 
-case class RegisterActionRequestBody(
+case class RegisterActionRequestBody private(
     firstName: String,
     lastName: String,
     email: String,
@@ -18,7 +18,7 @@ case class RegisterActionRequestBody(
     password: String,
     receiveGnmMarketing: Boolean,
     receive3rdPartyMarketing: Boolean,
-    returnUrl: ReturnUrl,
+    returnUrl: Option[ReturnUrl],
     skipConfirmation: Option[Boolean],
     group: Option[String],
     clientId: Option[ClientID],
@@ -92,7 +92,7 @@ object RegisterActionRequestBody {
         "password" -> password,
         "receiveGnmMarketing" -> boolean,
         "receive3rdPartyMarketing" -> boolean,
-        "returnUrl" -> returnUrl(refererHeader, configuration),
+        "returnUrl" -> returnUrl(refererHeader),
         "skipConfirmation" -> optional(boolean),
         "group" -> optional(group),
         "clientId" -> optional(clientId),

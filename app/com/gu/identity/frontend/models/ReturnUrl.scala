@@ -23,23 +23,33 @@ object ReturnUrl {
   def apply(returnUrlParam: Option[String], configuration: Configuration): ReturnUrl =
     apply(returnUrlParam, refererHeader = None, configuration, clientId = None)
 
-  def apply(returnUrlParam: Option[String], refererHeader: Option[String], configuration: Configuration, clientId: Option[ClientID]): ReturnUrl =
+  def apply(returnUrlParam: Option[String], refererHeader: Option[String]): Option[ReturnUrl] =
     returnUrlParam
       .flatMap(uriOpt)
       .orElse(refererHeader.flatMap(uriOpt))
       .filter(validDomain)
       .filter(validUrlPath)
       .map(uri => ReturnUrl(uri))
+
+  def apply(returnUrlParam: Option[String], refererHeader: Option[String], configuration: Configuration, clientId: Option[ClientID]): ReturnUrl =
+    apply(returnUrlParam, refererHeader)
       .getOrElse {
-        default(configuration, clientId)
+        defaultForClient(configuration, clientId)
       }
 
-  def default(configuration: Configuration, clientId: Option[ClientID]) = {
-    val url = clientId match {
-      case Some(GuardianMembersClientID) => configuration.membershipBaseUrl
-      case _ => configuration.dotcomBaseUrl
+  def default(configuration: Configuration) =
+    defaultFromUrl(configuration.dotcomBaseUrl)
+
+  def defaultForMembership(configuration: Configuration) =
+    defaultFromUrl(configuration.membershipBaseUrl)
+
+  def defaultForClient(configuration: Configuration, clientId: Option[ClientID]) =
+    clientId match {
+      case Some(GuardianMembersClientID) => defaultForMembership(configuration)
+      case _ => default(configuration)
     }
 
+  private def defaultFromUrl(url: String) = {
     val defaultUri = uri(url).getOrElse {
       sys.error("Invalid defaultReturnUrl specified in configuration")
     }
@@ -72,8 +82,8 @@ object ReturnUrl {
     import play.api.data.Mapping
     import play.api.data.Forms.{optional, text}
 
-    def returnUrl(refererHeader: Option[String], configuration: Configuration): Mapping[ReturnUrl] =
-      optional(text).transform(ReturnUrl.apply(_: Option[String], refererHeader, configuration), _.toStringOpt)
+    def returnUrl(refererHeader: Option[String]): Mapping[Option[ReturnUrl]] =
+      optional(text).transform(ReturnUrl.apply(_: Option[String], refererHeader), _.flatMap(_.toStringOpt))
   }
 
 }

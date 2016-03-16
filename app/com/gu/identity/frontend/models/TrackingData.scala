@@ -21,9 +21,6 @@ case class TrackingData(returnUrl:Option[String],
 }
 
 object TrackingData extends RemoteAddress {
-  def apply(request: RequestHeader, returnUrl: ReturnUrl): TrackingData =
-    apply(request, returnUrl.toStringOpt)
-
 
   def apply(request: RequestHeader, returnUrl: Option[String]): TrackingData = {
     TrackingData(
