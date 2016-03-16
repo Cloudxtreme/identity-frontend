@@ -1,14 +1,12 @@
 package com.gu.identity.frontend.controllers
 
-import com.gu.identity.frontend.authentication.{IdentityApiCookie, CookieName}
+import com.gu.identity.frontend.authentication.CookieName
 import com.gu.identity.frontend.configuration.Configuration
-import com.gu.identity.frontend.csrf.CSRFConfig
 import com.gu.identity.frontend.models.TrackingData
 import com.gu.identity.frontend.services._
-import org.mockito.{ArgumentCaptor, ArgumentMatcher}
+import org.mockito.ArgumentCaptor
 import org.mockito.Matchers.{any => argAny, eq => argEq}
 import org.mockito.Mockito._
-import org.scalatest.Matchers._
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import play.api.i18n.MessagesApi
