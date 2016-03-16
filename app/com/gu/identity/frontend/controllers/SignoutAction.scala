@@ -13,7 +13,7 @@ import play.api.mvc._
 
 import scala.concurrent.Future
 
-class SignOutAction(identityService: IdentityService, config: Configuration, val messagesApi: MessagesApi, httpErrorHandler: HttpErrorHandler) extends Controller with ExecutionContexts with Logging with I18nSupport {
+class SignOutAction(identityService: IdentityService, val messagesApi: MessagesApi, config: Configuration) extends Controller with ExecutionContexts with Logging with I18nSupport {
 
   implicit def cookieNameToString(cookieName: Name): String = cookieName.toString
 

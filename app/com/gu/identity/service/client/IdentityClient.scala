@@ -1,6 +1,6 @@
 package com.gu.identity.service.client
 
-import com.gu.identity.frontend.authentication.IdentityCookie
+import com.gu.identity.frontend.authentication.IdentityApiCookie
 import com.gu.identity.frontend.models.TrackingData
 import com.gu.identity.service.client.request._
 import com.gu.identity.service.client.models.User
@@ -8,18 +8,18 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class IdentityClient extends Logging {
 
-  def authenticateCookies(email: Option[String], password: Option[String], rememberMe: Boolean, trackingData: TrackingData)(implicit configuration: IdentityClientConfiguration, ec: ExecutionContext): Future[Either[IdentityClientErrors, Seq[IdentityCookie]]] =
+  def authenticateCookies(email: Option[String], password: Option[String], rememberMe: Boolean, trackingData: TrackingData)(implicit configuration: IdentityClientConfiguration, ec: ExecutionContext): Future[Either[IdentityClientErrors, Seq[IdentityApiCookie]]] =
     AuthenticateCookiesApiRequest(email, password, rememberMe, trackingData) match {
       case Right(request) => authenticateCookies(request)
       case Left(err) => Future.successful(Left(Seq(err)))
     }
 
-  def authenticateCookies(request: AuthenticateCookiesApiRequest)(implicit configuration: IdentityClientConfiguration, ec: ExecutionContext): Future[Either[IdentityClientErrors, Seq[IdentityCookie]]] =
+  def authenticateCookies(request: AuthenticateCookiesApiRequest)(implicit configuration: IdentityClientConfiguration, ec: ExecutionContext): Future[Either[IdentityClientErrors, Seq[IdentityApiCookie]]] =
     configuration.requestHandler.handleRequest(request).map {
       case Left(error) => Left(error)
       case Right(AuthenticationCookiesResponse(cookies)) =>
         Right(cookies.values.map { c =>
-          IdentityCookie(name = c.key, value = c.value, isSession = c.sessionCookie.getOrElse(false), expires = cookies.expiresAt)
+          IdentityApiCookie(name = c.key, value = c.value, isSession = c.sessionCookie.getOrElse(false), expires = cookies.expiresAt)
         })
       case Right(other) => Left(Seq(GatewayError("Unknown response")))
     }
@@ -64,13 +64,13 @@ class IdentityClient extends Logging {
     }
   }
 
-  def deauthenticate(request: DeauthenticateApiRequest)(implicit configuration: IdentityClientConfiguration, ec: ExecutionContext): Future[Either[IdentityClientErrors, Seq[IdentityCookie]]] = {
+  def deauthenticate(request: DeauthenticateApiRequest)(implicit configuration: IdentityClientConfiguration, ec: ExecutionContext): Future[Either[IdentityClientErrors, Seq[IdentityApiCookie]]] = {
     configuration.requestHandler.handleRequest(request).map {
       case Left(error) => Left(error)
       case Right(response: DeauthenticationCookiesResponse) => Right({
         val expiresAt = response.cookies.expiresAt
         response.cookies.values.map { c =>
-          IdentityCookie(name = c.key, value = c.value, isSession = false, expires = expiresAt)
+          IdentityApiCookie(name = c.key, value = c.value, isSession = false, expires = expiresAt)
         }
       })
       case Right(other) => Left(Seq(GatewayError("Unknown response")))

@@ -9,6 +9,14 @@ case class AuthenticatedUser(userId: String)
 
 object AuthenticationService {
 
+  val knownCookies: Seq[GuardianCookie] = Seq(
+    DotComCookie(CookieName.gu_user_features_expiry, secure = false),
+    DotComCookie(CookieName.gu_paying_member, secure = false),
+    IdentityCookie(CookieName.GU_U, secure = false),
+    IdentityCookie(CookieName.GU_ID_CSRF, secure = true),
+    IdentityCookie(CookieName.SC_GU_U, secure = true)
+  )
+
   implicit def cookieNameToString(cookieName: Name): String = cookieName.toString
 
   def authenticatedUserFor[A](request: RequestHeader, cookieDecoder: String => Option[User]): Option[AuthenticatedUser] = for {
@@ -23,15 +31,11 @@ object AuthenticationService {
       cookieDomain: String,
       newCookies: Seq[Cookie] = Seq.empty): Result = {
 
-    val cookiesToDiscard: Seq[DiscardingCookie] = Seq(
-      DotComCookie(CookieName.gu_user_features_expiry, secure = false),
-      DotComCookie(CookieName.gu_paying_member, secure = false),
-      DotComCookie(CookieName.GU_ID_CSRF, secure = true),
-      DotComCookie(CookieName.GU_U, secure = false),
-      DotComCookie(CookieName.SC_GU_U, secure = true)
-    ).map(cookie => DiscardingCookie(cookie.name, "/", Some(cookieDomain), secure = cookie.secure))
+    val cookiesToDiscard: Seq[DiscardingCookie] = knownCookies.map { cookie =>
+      DiscardingCookie(name = cookie.name, path = "/", domain = Some(cookieDomain), secure = cookie.secure)
+    }
 
-    Found(verifiedReturnUrl)
+    SeeOther(verifiedReturnUrl)
       .withHeaders("Cache-Control" -> "no-cache", "Pragma" -> "no-cache")
       .discardingCookies(cookiesToDiscard:_*)
       .withCookies(newCookies: _*)
